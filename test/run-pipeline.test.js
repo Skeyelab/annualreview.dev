@@ -88,6 +88,17 @@ describe("runPipeline", () => {
     expect(createCallCount).toBe(4);
   });
 
+  it("passes goals through to pipeline when provided", async () => {
+    const evidence = {
+      timeframe: { start_date: "2025-01-01", end_date: "2025-12-31" },
+      goals: "Improve reliability\nGrow as a technical leader",
+      contributions: [],
+    };
+    const result = await runPipeline(evidence, { apiKey: "sk-test" });
+    expect(result).toEqual({ themes: mockThemes, bullets: mockBullets, stories: mockStories, self_eval: mockSelfEval });
+    expect(createCallCount).toBe(4);
+  });
+
   it("step 2 payload uses slimmed contributions", async () => {
     const evidence = {
       timeframe: { start_date: "2025-01-01", end_date: "2025-12-31" },

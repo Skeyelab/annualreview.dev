@@ -3,6 +3,7 @@ TASK: Write impact-focused annual review bullets from theme clusters + evidence.
 INPUT JSON:
 {
   "timeframe": {...},
+  "goals": "optional free-text annual goals",
   "themes": [... from previous step ...],
   "contributions": [... same as before ...],
   "user_context_optional": {
@@ -36,6 +37,7 @@ OUTPUT (valid JSON only):
 }
 
 BULLET WRITING RULES:
+- If goals are provided, prioritize bullets from themes that align with those goals, and note goal alignment when present.
 - Each bullet: “Did X so that Y” (action → outcome). If outcome not proven, write:
   “Did X (outcome likely: Y; confirm?)”
 - Avoid vanity metrics. Don’t fabricate numbers.

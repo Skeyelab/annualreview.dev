@@ -350,6 +350,29 @@
   color: var(--text-muted);
 }
 
+.generate-goals-section {
+  margin-bottom: 1rem;
+}
+
+.generate-goals-label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: var(--text);
+}
+
+.generate-goals-optional {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
+.generate-goals-textarea {
+  font-family: var(--font-sans);
+  margin-bottom: 0.35rem;
+}
+
 .generate-error {
   color: #e57373;
   margin: 0 0 1rem;

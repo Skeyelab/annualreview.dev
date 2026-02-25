@@ -21,6 +21,24 @@ describe("validateEvidence", () => {
     expect(result.valid).toBe(true);
   });
 
+  it("accepts evidence with optional goals", () => {
+    const result = validateEvidence({
+      timeframe: { start_date: "2025-01-01", end_date: "2025-12-31" },
+      goals: "Improve system reliability\nGrow as a technical leader",
+      contributions: [],
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects evidence with non-string goals", () => {
+    const result = validateEvidence({
+      timeframe: { start_date: "2025-01-01", end_date: "2025-12-31" },
+      goals: ["goal 1", "goal 2"],
+      contributions: [],
+    });
+    expect(result.valid).toBe(false);
+  });
+
   it("rejects missing timeframe", () => {
     const result = validateEvidence({ contributions: [] });
     expect(result.valid).toBe(false);

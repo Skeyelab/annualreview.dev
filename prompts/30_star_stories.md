@@ -3,6 +3,7 @@ TASK: Produce 2–3 deeper “impact stories” in STAR format for the strongest
 INPUT JSON:
 {
   "timeframe": {...},
+  "goals": "optional free-text annual goals",
   "themes": [...],
   "bullets_by_theme": [...],
   "contributions": [...]
@@ -26,6 +27,7 @@ OUTPUT (valid JSON only):
 }
 
 RULES:
+- If goals are provided, prefer stories from themes that most directly support those goals.
 - 2–3 stories total.
 - Keep situation/task concise; focus on actions/results.
 - Results must be evidenced; if not, mark as “Potential result (confirm)”.
