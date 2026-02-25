@@ -8,6 +8,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { runPipeline } from "../lib/run-pipeline.js";
+import { generateMarkdown } from "../lib/generate-markdown.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -89,6 +90,8 @@ export async function runGenerateReview(inputPath, outDir, pipelineFn = runPipel
   writeFileSync(join(outDir, "bullets.json"), JSON.stringify(bullets, null, 2));
   writeFileSync(join(outDir, "stories.json"), JSON.stringify(stories, null, 2));
   writeFileSync(join(outDir, "self_eval.json"), JSON.stringify(self_eval, null, 2));
+  const markdown = generateMarkdown({ themes, bullets, stories, self_eval }, { timeframe: evidence.timeframe });
+  writeFileSync(join(outDir, "report.md"), markdown);
   return { themes, bullets, stories, self_eval };
 }
 
@@ -112,7 +115,7 @@ async function main() {
   } else {
     process.stdout.write(`\r  ✓ [4/4] ${STEP_LABELS[3]}${" ".repeat(24)}\n`);
   }
-  console.log("Wrote themes.json, bullets.json, stories.json, self_eval.json to", outDir);
+  console.log("Wrote themes.json, bullets.json, stories.json, self_eval.json, report.md to", outDir);
 }
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];

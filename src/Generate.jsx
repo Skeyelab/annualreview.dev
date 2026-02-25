@@ -1,6 +1,7 @@
 // Page: 1) Get GitHub data (OAuth or token or CLI), 2) Paste/upload evidence JSON, 3) Generate → themes, bullets, stories, self-eval.
 import React, { useState, useEffect } from "react";
 import "./Generate.css";
+import { generateMarkdown } from "../lib/generate-markdown.js";
 import { posthog } from "./posthog";
 
 const GITHUB_TOKEN_URL = "https://github.com/settings/tokens/new?scopes=repo&description=AnnualReview.dev";
@@ -195,6 +196,24 @@ export default function Generate() {
     fetch("/api/auth/logout", { method: "POST", credentials: "include" }).then(() => setUser(null));
   };
 
+  const handleDownloadReport = () => {
+    let timeframe;
+    try {
+      const ev = JSON.parse(evidenceText);
+      timeframe = ev.timeframe;
+    } catch {
+      // no timeframe available
+    }
+    const md = generateMarkdown(result, { timeframe });
+    const blob = new Blob([md], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "annual-review-report.md";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="generate">
       <header className="generate-header">
@@ -334,6 +353,7 @@ yarn normalize --input raw.json --output evidence.json`}
             <ResultSection title="Bullets" data={result.bullets} />
             <ResultSection title="STAR stories" data={result.stories} />
             <ResultSection title="Self-eval sections" data={result.self_eval} />
+            <ReportSection result={result} evidenceText={evidenceText} onDownload={handleDownloadReport} />
           </div>
         )}
       </main>
@@ -351,6 +371,50 @@ function ResultSection({ title, data }) {
         <button type="button" className="generate-copy" onClick={() => navigator.clipboard.writeText(text)}>Copy</button>
       </div>
       <pre className="generate-pre">{text}</pre>
+    </section>
+  );
+}
+
+/** Markdown report section: preview + download. */
+function ReportSection({ result, evidenceText, onDownload }) {
+  const [showPreview, setShowPreview] = useState(false);
+  let timeframe;
+  try {
+    const ev = JSON.parse(evidenceText);
+    timeframe = ev.timeframe;
+  } catch {
+    // no timeframe
+  }
+  const md = generateMarkdown(result, { timeframe });
+  return (
+    <section className="generate-section generate-report-section">
+      <div className="generate-section-head">
+        <h3>Markdown report</h3>
+        <div className="generate-report-actions">
+          <button
+            type="button"
+            className="generate-copy"
+            onClick={() => setShowPreview((v) => !v)}
+          >
+            {showPreview ? "Hide preview" : "Preview"}
+          </button>
+          <button
+            type="button"
+            className="generate-copy"
+            onClick={() => navigator.clipboard.writeText(md)}
+          >
+            Copy
+          </button>
+          <button
+            type="button"
+            className="generate-download-btn"
+            onClick={onDownload}
+          >
+            Download .md
+          </button>
+        </div>
+      </div>
+      {showPreview && <pre className="generate-pre generate-report-pre">{md}</pre>}
     </section>
   );
 }

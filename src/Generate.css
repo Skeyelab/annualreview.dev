@@ -442,6 +442,37 @@
   max-height: 20rem;
 }
 
+.generate-report-section {
+  border-top: 1px dashed var(--border);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.generate-report-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.generate-download-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.generate-download-btn:hover {
+  background: var(--accent-dim);
+}
+
+.generate-report-pre {
+  max-height: 30rem;
+}
+
 .generate-footer-note {
   margin: 2rem 0 0;
   font-size: 0.8rem;
