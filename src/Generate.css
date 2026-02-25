@@ -191,7 +191,7 @@
 .generate-pre {
   margin: 0;
   padding: 1rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono), monospace;
   font-size: 0.8rem;
   line-height: 1.45;
   background: var(--bg-elevated);
@@ -199,4 +199,102 @@
   border-radius: 6px;
   overflow: auto;
   max-height: 20rem;
+}
+
+.generate-import-block {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.generate-import-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.generate-import-label span {
+  min-width: 2rem;
+}
+
+.generate-import-date {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.generate-import-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.generate-import-btn:hover:not(:disabled) {
+  background: var(--accent-dim);
+}
+
+.generate-import-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.generate-connect {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.generate-result-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.generate-result-actions h2 {
+  margin: 0;
+}
+
+.generate-export-btns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.generate-appendix-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.generate-appendix-list li {
+  margin-bottom: 0.5rem;
+}
+
+.generate-appendix-list ul {
+  list-style: none;
+  padding-left: 1rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.generate-appendix-list a {
+  color: var(--accent);
 }

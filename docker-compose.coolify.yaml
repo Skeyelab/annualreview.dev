@@ -1,0 +1,24 @@
+# Coolify-style compose: build from Dockerfile, single service.
+# Use in Coolify as "Compose" source, or as reference for port/env.
+# documentation: https://github.com/Skeyelab/annual-review-story-kit#readme
+# slogan: Turn GitHub contributions into an evidence-backed annual review.
+# category: productivity
+# tags: annual-review,github,openai,resume,self-eval
+# port: 3000
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

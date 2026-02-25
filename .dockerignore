@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+.env.*
+*.log
+.DS_Store
+test
+*.test.js
+*.test.jsx
+vitest.config.js
+vite.config.js
+README.md
+docs
+.cursor

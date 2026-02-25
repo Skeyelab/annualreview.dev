@@ -8,7 +8,15 @@ import Generate from "../src/Generate.jsx";
 
 describe("Generate", () => {
   beforeEach(() => {
-    vi.stubGlobal("fetch", vi.fn());
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url) => {
+        if (url === "/api/me") {
+          return Promise.resolve({ json: () => Promise.resolve({ connected: false }) });
+        }
+        return Promise.reject(new Error("unmocked"));
+      })
+    );
   });
 
   it("renders title and evidence textarea", () => {
@@ -19,13 +27,21 @@ describe("Generate", () => {
   });
 
   it("Try sample loads sample JSON into textarea", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          timeframe: { start_date: "2025-01-01", end_date: "2025-12-31" },
-          contributions: [],
-        }),
+    vi.mocked(fetch).mockImplementation((url) => {
+      if (url === "/api/me") {
+        return Promise.resolve({ json: () => Promise.resolve({ connected: false }) });
+      }
+      if (url === "/sample-evidence.json" || url.endsWith("sample-evidence.json")) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              timeframe: { start_date: "2025-01-01", end_date: "2025-12-31" },
+              contributions: [],
+            }),
+        });
+      }
+      return Promise.reject(new Error("unmocked"));
     });
     render(<Generate />);
     fireEvent.click(screen.getByRole("button", { name: /try sample/i }));
