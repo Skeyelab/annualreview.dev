@@ -27,7 +27,7 @@ describe("Landing", () => {
 
   it("renders hero title and feature cards", () => {
     render(<Landing />);
-    expect(screen.getByRole("heading", { name: /stop dreading/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /stop putting off/i })).toBeInTheDocument();
     expect(screen.getByText(/Theme Clusters/)).toBeInTheDocument();
     expect(screen.getByText(/Impact Bullets/)).toBeInTheDocument();
     expect(screen.getByText(/STAR Stories/)).toBeInTheDocument();

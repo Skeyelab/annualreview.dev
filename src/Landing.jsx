@@ -1,5 +1,8 @@
-import React from "react";
+// Marketing landing: hero, features, how-it-works, CTA. Sticky “Generate” bar after scrolling past hero.
+import React, { useState, useEffect } from "react";
 import "./Landing.css";
+
+const SCROLL_Y_SHOW_STICKY_CTA = 400;
 
 const FEATURES = [
   {
@@ -32,8 +35,27 @@ const STEPS = [
 ];
 
 export default function Landing() {
+  const [showStickyCta, setShowStickyCta] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowStickyCta(window.scrollY > SCROLL_Y_SHOW_STICKY_CTA);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <div className="landing">
+      {showStickyCta && (
+        <div className="sticky-cta" role="banner">
+          <div className="sticky-cta-inner">
+            <span className="sticky-cta-text">Turn your GitHub activity into a review in 5 minutes.</span>
+            <a href="/generate" className="btn btn-primary">
+              Generate my review <span className="btn-arrow">→</span>
+            </a>
+          </div>
+        </div>
+      )}
       <nav className="nav">
         <div className="nav-inner">
           <a href="/" className="nav-brand">
@@ -55,21 +77,20 @@ export default function Landing() {
           <div className="container hero-content">
             <p className="hero-kicker">GitHub → evidence → narrative</p>
             <h1 className="hero-title">
-              Stop dreading<br />your self-review.
+              Stop putting off<br />your self-review.
             </h1>
             <p className="hero-sub">
               You shipped all year. You shouldn't have to spend a week
-              proving it. Paste your GitHub activity, get an evidence-backed
-              annual review in minutes—every claim linked to a real PR.
+              proving it. <strong>Free, no signup.</strong> Paste your GitHub
+              activity, get an evidence-backed annual review in minutes—every
+              claim linked to a real PR.
             </p>
             <div className="hero-actions">
               <a href="/generate" className="btn btn-primary btn-lg">
                 Generate my review
                 <span className="btn-arrow">→</span>
               </a>
-              <a href="#how" className="btn btn-ghost btn-lg">
-                See how it works
-              </a>
+              <a href="#how" className="hero-secondary-link">See how it works</a>
             </div>
           </div>
         </section>
@@ -78,8 +99,8 @@ export default function Landing() {
         <section className="proof-bar">
           <div className="container">
             <p className="proof-text">
-              Built for ICs, tech leads, and contractors who'd rather
-              ship code than write about shipping code.
+              Free · No signup · Your data stays yours. Built for ICs, tech
+              leads, and contractors who'd rather ship code than write about it.
             </p>
           </div>
         </section>
@@ -205,7 +226,8 @@ export default function Landing() {
             <span className="nav-icon">⟡</span> AnnualReview.dev
           </a>
           <p className="footer-sub">
-            For engineers who ship more than they self-promote.
+            For engineers who ship more than they self-promote.{" "}
+            <a href="https://github.com/Skeyelab/annualreview.com" target="_blank" rel="noopener noreferrer">Open source</a>.
           </p>
         </div>
       </footer>
