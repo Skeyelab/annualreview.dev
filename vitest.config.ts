@@ -11,6 +11,7 @@ export default defineConfig({
         "**/node_modules/**",
         "**/dist/**",
         "**/*.config.js",
+        "**/*.config.ts",
         "test/**",
       ],
       reporter: ["text", "text-summary"],

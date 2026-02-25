@@ -2,15 +2,24 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./Generate.css";
 import { generateMarkdown } from "../lib/generate-markdown.js";
+import type { Timeframe } from "../types/evidence.js";
 import { posthog } from "./posthog";
 import { parseJsonResponse, pollJob } from "./api.js";
-import { useAuth } from "./hooks/useAuth.js";
-import { useGitHubCollect } from "./hooks/useGitHubCollect.js";
-import CollectForm from "./CollectForm.jsx";
-import ResultSection from "./ResultSection.jsx";
+import { useAuth } from "./hooks/useAuth";
+import { useGitHubCollect } from "./hooks/useGitHubCollect";
+import CollectForm from "./CollectForm";
+import ResultSection from "./ResultSection";
 
-const GITHUB_TOKEN_URL = "https://github.com/settings/tokens/new?scopes=repo&description=AnnualReview.dev";
+const GITHUB_TOKEN_URL =
+  "https://github.com/settings/tokens/new?scopes=repo&description=AnnualReview.dev";
 const REPO_URL = "https://github.com/Skeyelab/annualreview.com";
+
+interface PipelineResultLike {
+  themes?: unknown;
+  bullets?: unknown;
+  stories?: unknown;
+  self_eval?: unknown;
+}
 
 export default function Generate() {
   const { user, authChecked, logout } = useAuth();
@@ -18,10 +27,10 @@ export default function Generate() {
   const [goals, setGoals] = useState("");
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const [result, setResult] = useState<PipelineResultLike | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const onEvidenceReceived = useCallback((text) => {
+  const onEvidenceReceived = useCallback((text: string) => {
     setEvidenceText(text);
     setError(null);
   }, []);
@@ -45,7 +54,7 @@ export default function Generate() {
     if (!user) return;
     fetch("/api/jobs", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : {}))
-      .then((data) => {
+      .then((data: { latest?: { status?: string; result?: unknown } }) => {
         const job = data.latest;
         if (job?.status === "done" && job.result) {
           setEvidenceText(JSON.stringify(job.result, null, 2));
@@ -56,25 +65,36 @@ export default function Generate() {
   }, [user]);
 
   const handleGenerate = async () => {
-    let evidence;
+    let evidence: Record<string, unknown>;
     try {
-      evidence = JSON.parse(evidenceText);
+      evidence = JSON.parse(evidenceText) as Record<string, unknown>;
     } catch {
       const looksTruncated =
-        /[\{\[,]\s*$/.test(evidenceText.trim()) || !evidenceText.includes('"contributions"');
+        /[\{\[,]\s*$/.test(evidenceText.trim()) ||
+        !evidenceText.includes('"contributions"');
       setError(
         looksTruncated
-          ? "Invalid JSON—looks truncated (e.g. missing contributions or closing brackets). Try \"Upload evidence.json\" instead of pasting, or paste the full file again."
+          ? 'Invalid JSON—looks truncated (e.g. missing contributions or closing brackets). Try "Upload evidence.json" instead of pasting, or paste the full file again.'
           : "Invalid JSON. Paste or upload a valid evidence.json."
       );
       return;
     }
-    if (!evidence.timeframe?.start_date || !evidence.timeframe?.end_date || !Array.isArray(evidence.contributions)) {
-      setError("Evidence must have timeframe.start_date, timeframe.end_date, and contributions array.");
+    const tf = evidence.timeframe as { start_date?: string; end_date?: string } | undefined;
+    if (
+      !tf?.start_date ||
+      !tf?.end_date ||
+      !Array.isArray(evidence.contributions)
+    ) {
+      setError(
+        "Evidence must have timeframe.start_date, timeframe.end_date, and contributions array."
+      );
       return;
     }
-    if (goals.trim() && !evidence.goals) {
-      evidence = { ...evidence, goals: goals.trim() };
+    if (
+      (goals as string).trim() &&
+      !(evidence as { goals?: string }).goals
+    ) {
+      evidence = { ...evidence, goals: (goals as string).trim() };
     }
     setError(null);
     setLoading(true);
@@ -87,31 +107,39 @@ export default function Generate() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(evidence),
       });
-      const data = await parseJsonResponse(res);
+      const data = (await parseJsonResponse(res)) as {
+        job_id?: string;
+        error?: string;
+        [key: string]: unknown;
+      };
       if (res.status === 202 && data.job_id) {
         const out = await pollJob(data.job_id, setProgress);
-        setResult(out);
+        setResult(out as PipelineResultLike);
         posthog?.capture("review_generate_completed");
       } else if (!res.ok) {
-        throw new Error(data.error || "Generate failed");
+        throw new Error((data.error as string) || "Generate failed");
       } else {
-        setResult(data);
+        setResult(data as PipelineResultLike);
         posthog?.capture("review_generate_completed");
       }
     } catch (e) {
-      posthog?.capture("review_generate_failed", { error: e.message });
-      setError(e.message || "Pipeline failed. Is OPENAI_API_KEY set?");
+      const err = e as Error;
+      posthog?.capture("review_generate_failed", { error: err.message });
+      setError(err.message || "Pipeline failed. Is OPENAI_API_KEY set?");
     } finally {
       setLoading(false);
       setProgress("");
     }
   };
 
-  const handleFile = (e) => {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const r = new FileReader();
-    r.onload = () => { setEvidenceText(r.result); setError(null); };
+    r.onload = () => {
+      setEvidenceText(r.result as string);
+      setError(null);
+    };
     r.readAsText(file);
   };
 
@@ -124,7 +152,7 @@ export default function Generate() {
       setEvidenceText(JSON.stringify(data, null, 2));
       setError(null);
     } catch (e) {
-      setError(e.message || "Could not load sample.");
+      setError((e as Error).message || "Could not load sample.");
     }
   };
 
@@ -134,14 +162,17 @@ export default function Generate() {
   };
 
   const handleDownloadReport = () => {
-    let timeframe;
+    let timeframe: Timeframe | undefined;
     try {
-      const ev = JSON.parse(evidenceText);
+      const ev = JSON.parse(evidenceText) as { timeframe?: Timeframe };
       timeframe = ev.timeframe;
     } catch {
       // no timeframe available
     }
-    const md = generateMarkdown(result, { timeframe });
+    const md = generateMarkdown(
+      result as Parameters<typeof generateMarkdown>[0],
+      { timeframe }
+    );
     const blob = new Blob([md], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -162,20 +193,37 @@ export default function Generate() {
           {authChecked && user && (
             <span className="generate-signed-in">
               Signed in as <strong>{user.login}</strong>
-              <button type="button" className="generate-logout" onClick={handleLogout}>Log out</button>
+              <button
+                type="button"
+                className="generate-logout"
+                onClick={handleLogout}
+              >
+                Log out
+              </button>
             </span>
           )}
-          <a href="/" className="generate-back">← Back</a>
+          <a href="/" className="generate-back">
+            ← Back
+          </a>
         </div>
       </header>
 
       <main className="generate-main">
         <h1 className="generate-title">Generate review</h1>
 
-        <section className="generate-get-data" aria-labelledby="get-data-heading">
-          <h2 id="get-data-heading" className="generate-get-data-title">1. Get your GitHub data</h2>
+        <section
+          className="generate-get-data"
+          aria-labelledby="get-data-heading"
+        >
+          <h2 id="get-data-heading" className="generate-get-data-title">
+            1. Get your GitHub data
+          </h2>
 
-          <div className="generate-get-data-tabs" role="tablist" aria-label="How to get data">
+          <div
+            className="generate-get-data-tabs"
+            role="tablist"
+            aria-label="How to get data"
+          >
             <button
               type="button"
               role="tab"
@@ -211,7 +259,9 @@ export default function Generate() {
               {authChecked && user ? (
                 <>
                   <h3 className="generate-option-heading">Fetch your data</h3>
-                  <p className="generate-option-desc">Fetch your PRs and reviews for the date range.</p>
+                  <p className="generate-option-desc">
+                    Fetch your PRs and reviews for the date range.
+                  </p>
                   <CollectForm
                     startDate={collectStart}
                     endDate={collectEnd}
@@ -226,15 +276,38 @@ export default function Generate() {
                 </>
               ) : (
                 <>
-                  <h3 className="generate-option-heading">Sign in with GitHub</h3>
+                  <h3 className="generate-option-heading">
+                    Sign in with GitHub
+                  </h3>
                   <p className="generate-option-desc">
-                    We fetch your PRs and reviews for the date range. We never store your code.
+                    We fetch your PRs and reviews for the date range. We never
+                    store your code.
                   </p>
                   <div className="generate-oauth-buttons">
-                    <a href="/api/auth/github?scope=public" className="generate-oauth-btn" onClick={() => posthog?.capture("login_started", { scope: "public" })}>Connect (public repos only)</a>
-                    <a href="/api/auth/github?scope=private" className="generate-oauth-btn generate-oauth-btn-private" onClick={() => posthog?.capture("login_started", { scope: "private" })}>Connect (include private repos)</a>
+                    <a
+                      href="/api/auth/github?scope=public"
+                      className="generate-oauth-btn"
+                      onClick={() =>
+                        posthog?.capture("login_started", { scope: "public" })
+                      }
+                    >
+                      Connect (public repos only)
+                    </a>
+                    <a
+                      href="/api/auth/github?scope=private"
+                      className="generate-oauth-btn generate-oauth-btn-private"
+                      onClick={() =>
+                        posthog?.capture("login_started", {
+                          scope: "private",
+                        })
+                      }
+                    >
+                      Connect (include private repos)
+                    </a>
                   </div>
-                  <p className="generate-option-desc generate-or">Or paste a Personal Access Token:</p>
+                  <p className="generate-option-desc generate-or">
+                    Or paste a Personal Access Token:
+                  </p>
                   <CollectForm
                     startDate={collectStart}
                     endDate={collectEnd}
@@ -250,7 +323,10 @@ export default function Generate() {
                       type="password"
                       placeholder="Paste your GitHub token (ghp_... or gho_...)"
                       value={collectToken}
-                      onChange={(e) => { setCollectToken(e.target.value); setCollectError(null); }}
+                      onChange={(e) => {
+                        setCollectToken(e.target.value);
+                        setCollectError(null);
+                      }}
                       className="generate-collect-input"
                       autoComplete="off"
                     />
@@ -271,61 +347,118 @@ export default function Generate() {
                 Run two commands. Your token stays on your machine.
               </p>
               <ol className="generate-steps-list">
-                <li>Create a token at <a href={GITHUB_TOKEN_URL} target="_blank" rel="noopener noreferrer">github.com/settings/tokens</a> with <strong>repo</strong> scope.</li>
-                <li>From this repo (<a href={REPO_URL} target="_blank" rel="noopener noreferrer">clone it</a>), run:
+                <li>
+                  Create a token at{" "}
+                  <a
+                    href={GITHUB_TOKEN_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    github.com/settings/tokens
+                  </a>{" "}
+                  with <strong>repo</strong> scope.
+                </li>
+                <li>
+                  From this repo (
+                  <a
+                    href={REPO_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    clone it
+                  </a>
+                  ), run:
                   <pre className="generate-cmd">
-{`GITHUB_TOKEN=ghp_your_token yarn collect --start ${collectStart} --end ${collectEnd} --output raw.json
+                    {`GITHUB_TOKEN=ghp_your_token yarn collect --start ${collectStart} --end ${collectEnd} --output raw.json
 yarn normalize --input raw.json --output evidence.json`}
                   </pre>
                 </li>
-                <li>Upload <code>evidence.json</code> below or paste its contents.</li>
+                <li>
+                  Upload <code>evidence.json</code> below or paste its
+                  contents.
+                </li>
               </ol>
             </div>
           </div>
         </section>
 
-        <h2 className="generate-step-title">2. Paste or upload evidence</h2>
+        <h2 className="generate-step-title">
+          2. Paste or upload evidence
+        </h2>
         <p className="generate-lead">
-          Evidence JSON must include <code>timeframe</code> and <code>contributions</code>. After fetching above or from the CLI, paste or upload it here.
+          Evidence JSON must include <code>timeframe</code> and{" "}
+          <code>contributions</code>. After fetching above or from the CLI, paste
+          or upload it here.
         </p>
 
         <div className="generate-input-row">
           <label className="generate-file-label">
             Upload evidence.json
-            <input type="file" accept=".json,application/json" onChange={handleFile} className="generate-file-input" />
+            <input
+              type="file"
+              accept=".json,application/json"
+              onChange={handleFile}
+              className="generate-file-input"
+            />
           </label>
-          <button type="button" className="generate-sample-btn" onClick={loadSample}>Try sample</button>
+          <button
+            type="button"
+            className="generate-sample-btn"
+            onClick={loadSample}
+          >
+            Try sample
+          </button>
         </div>
         <textarea
           className="generate-textarea"
           placeholder='{"timeframe": {"start_date": "2025-01-01", "end_date": "2025-12-31"}, "contributions": [...]}'
           value={evidenceText}
-          onChange={(e) => { setEvidenceText(e.target.value); setError(null); }}
+          onChange={(e) => {
+            setEvidenceText(e.target.value);
+            setError(null);
+          }}
           rows={8}
           spellCheck={false}
         />
-        <p className="generate-hint">On mobile, pasting long JSON can be cut off—use &quot;Upload evidence.json&quot; for large data.</p>
+        <p className="generate-hint">
+          On mobile, pasting long JSON can be cut off—use &quot;Upload
+          evidence.json&quot; for large data.
+        </p>
 
         <div className="generate-goals-section">
-          <label htmlFor="generate-goals" className="generate-goals-label">
-            Annual goals <span className="generate-goals-optional">(optional)</span>
+          <label
+            htmlFor="generate-goals"
+            className="generate-goals-label"
+          >
+            Annual goals{" "}
+            <span className="generate-goals-optional">(optional)</span>
           </label>
           <textarea
             id="generate-goals"
             className="generate-textarea generate-goals-textarea"
-            placeholder={"Paste your annual goals here, e.g.:\n- Improve system reliability\n- Grow as a technical leader\n- Ship the new onboarding flow"}
+            placeholder={
+              "Paste your annual goals here, e.g.:\n- Improve system reliability\n- Grow as a technical leader\n- Ship the new onboarding flow"
+            }
             value={goals}
             onChange={(e) => setGoals(e.target.value)}
             rows={4}
             spellCheck={false}
           />
-          <p className="generate-hint">Goals are used as context to align themes, bullets, and stories to what matters most to you.</p>
+          <p className="generate-hint">
+            Goals are used as context to align themes, bullets, and stories to
+            what matters most to you.
+          </p>
         </div>
 
         {error && <p className="generate-error">{error}</p>}
         {progress && <p className="generate-progress">{progress}</p>}
 
-        <button type="button" className="generate-btn" onClick={handleGenerate} disabled={loading}>
+        <button
+          type="button"
+          className="generate-btn"
+          onClick={handleGenerate}
+          disabled={loading}
+        >
           {loading ? "Generating…" : "3. Generate review"}
         </button>
 
@@ -335,8 +468,15 @@ yarn normalize --input raw.json --output evidence.json`}
             <ResultSection title="Themes" data={result.themes} />
             <ResultSection title="Bullets" data={result.bullets} />
             <ResultSection title="STAR stories" data={result.stories} />
-            <ResultSection title="Self-eval sections" data={result.self_eval} />
-            <ReportSection result={result} evidenceText={evidenceText} onDownload={handleDownloadReport} />
+            <ResultSection
+              title="Self-eval sections"
+              data={result.self_eval}
+            />
+            <ReportSection
+              result={result}
+              evidenceText={evidenceText}
+              onDownload={handleDownloadReport}
+            />
           </div>
         )}
       </main>
@@ -344,17 +484,30 @@ yarn normalize --input raw.json --output evidence.json`}
   );
 }
 
+interface ReportSectionProps {
+  result: PipelineResultLike;
+  evidenceText: string;
+  onDownload: () => void;
+}
+
 /** Markdown report section: preview + download. */
-function ReportSection({ result, evidenceText, onDownload }) {
+function ReportSection({
+  result,
+  evidenceText,
+  onDownload,
+}: ReportSectionProps) {
   const [showPreview, setShowPreview] = useState(false);
-  let timeframe;
+  let timeframe: Timeframe | undefined;
   try {
-    const ev = JSON.parse(evidenceText);
+    const ev = JSON.parse(evidenceText) as { timeframe?: Timeframe };
     timeframe = ev.timeframe;
   } catch {
     // no timeframe
   }
-  const md = generateMarkdown(result, { timeframe });
+  const md = generateMarkdown(
+    result as Parameters<typeof generateMarkdown>[0],
+    { timeframe }
+  );
   return (
     <section className="generate-section generate-report-section">
       <div className="generate-section-head">
@@ -383,7 +536,9 @@ function ReportSection({ result, evidenceText, onDownload }) {
           </button>
         </div>
       </div>
-      {showPreview && <pre className="generate-pre generate-report-pre">{md}</pre>}
+      {showPreview && (
+        <pre className="generate-pre generate-report-pre">{md}</pre>
+      )}
     </section>
   );
 }

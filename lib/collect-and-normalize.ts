@@ -12,8 +12,8 @@ export interface CollectOptions {
  * Token is used in-memory only; never stored or logged.
  */
 export async function collectAndNormalize({ token, start_date, end_date }: CollectOptions): Promise<Evidence> {
-  const { collectRawGraphQL } = await import("../scripts/collect-github.js");
-  const { normalize } = await import("../scripts/normalize.js");
+  const { collectRawGraphQL } = await import("../scripts/collect-github.ts");
+  const { normalize } = await import("../scripts/normalize.ts");
 
   const raw = await collectRawGraphQL({
     start: start_date,

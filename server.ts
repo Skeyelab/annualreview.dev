@@ -1,9 +1,10 @@
 /**
  * Production server: serves dist/ and the same API routes as the Vite dev server.
- * For Coolify (or any Node host): run `yarn build && node server.js`.
+ * For Coolify (or any Node host): run `yarn build && yarn start` (or `node --import tsx/esm server.ts`).
  * Set PORT (default 3000), SESSION_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, OPENAI_API_KEY.
+ * Optional: POSTHOG_API_KEY (and POSTHOG_HOST) for LLM analytics in PostHog.
  */
-import { createServer } from "http";
+import { createServer, type IncomingMessage, type ServerResponse } from "http";
 import { readFile } from "fs/promises";
 import { join, extname } from "path";
 import { fileURLToPath } from "url";
@@ -14,8 +15,19 @@ const DIST = join(__dirname, "dist");
 import { runPipeline } from "./lib/run-pipeline.ts";
 import { collectAndNormalize } from "./lib/collect-and-normalize.ts";
 import { validateEvidence } from "./lib/validate-evidence.ts";
-import { createJob, getJob, getLatestJob, runInBackground } from "./lib/job-store.ts";
-import { createSession, getSession, destroySession, setOAuthState, getAndRemoveOAuthState } from "./lib/session-store.ts";
+import {
+  createJob,
+  getJob,
+  getLatestJob,
+  runInBackground,
+} from "./lib/job-store.ts";
+import {
+  createSession,
+  getSession,
+  destroySession,
+  setOAuthState,
+  getAndRemoveOAuthState,
+} from "./lib/session-store.ts";
 import {
   getAuthRedirectUrl,
   buildCallbackRequest,
@@ -33,13 +45,18 @@ import {
   getStateFromRequest,
   clearStateCookie,
 } from "./lib/cookies.ts";
-import { readJsonBody, respondJson, randomState, DATE_YYYY_MM_DD } from "./server/helpers.ts";
-import { authRoutes } from "./server/routes/auth.js";
-import { jobsRoutes } from "./server/routes/jobs.js";
-import { generateRoutes } from "./server/routes/generate.js";
-import { collectRoutes } from "./server/routes/collect.js";
+import {
+  readJsonBody,
+  respondJson,
+  randomState,
+  DATE_YYYY_MM_DD,
+} from "./server/helpers.ts";
+import { authRoutes } from "./server/routes/auth.ts";
+import { jobsRoutes } from "./server/routes/jobs.ts";
+import { generateRoutes } from "./server/routes/generate.ts";
+import { collectRoutes } from "./server/routes/collect.ts";
 
-const MIME = {
+const MIME: Record<string, string> = {
   ".html": "text/html",
   ".js": "application/javascript",
   ".css": "text/css",
@@ -50,15 +67,25 @@ const MIME = {
   ".woff2": "font/woff2",
 };
 
-async function serveStatic(res, pathname) {
-  const rel = pathname === "/" || pathname === "" ? "index.html" : pathname.replace(/^\//, "");
+async function serveStatic(
+  res: ServerResponse,
+  pathname: string
+): Promise<void> {
+  const rel =
+    pathname === "/" || pathname === ""
+      ? "index.html"
+      : pathname.replace(/^\//, "");
   const filePath = join(DIST, rel);
   try {
     const data = await readFile(filePath);
-    res.setHeader("Content-Type", MIME[extname(filePath)] || "application/octet-stream");
+    res.setHeader(
+      "Content-Type",
+      MIME[extname(filePath)] || "application/octet-stream"
+    );
     res.end(data);
   } catch (e) {
-    if (e.code === "ENOENT") {
+    const err = e as NodeJS.ErrnoException;
+    if (err.code === "ENOENT") {
       const index = await readFile(join(DIST, "index.html"));
       res.setHeader("Content-Type", "text/html");
       res.end(index);
@@ -69,7 +96,12 @@ async function serveStatic(res, pathname) {
   }
 }
 
-function handleRequest(req, res) {
+type Next = () => void;
+
+function handleRequest(
+  req: IncomingMessage,
+  res: ServerResponse,
+): void {
   const url = req.url || "/";
   const [pathname, qs] = url.split("?");
   const path = pathname.replace(/^\/+/, "");
@@ -82,25 +114,33 @@ function handleRequest(req, res) {
   const origin = `${isSecure ? "https" : "http"}://${host}`;
   const redirectUri = `${origin}/api/auth/callback/github`;
   const cookieOpts = { secure: isSecure };
-  const log = (event, detail) => console.error("[auth] " + event + (detail ? " " + detail : ""));
+  const log = (event: string, detail?: string): void =>
+    console.error("[auth] " + event + (detail ? " " + detail : ""));
 
   if (path.startsWith("api/")) {
     const sub = path.slice(4);
     const [area, ...rest] = sub.split("/");
     const restPath = rest.join("/");
     const pathAndQs = restPath + (qs ? "?" + qs : "");
-    const wrappedReq = Object.assign(Object.create(req), { url: pathAndQs ? "/" + pathAndQs : "/" });
+    const wrappedReq = Object.assign(Object.create(req), {
+      url: pathAndQs ? "/" + pathAndQs : "/",
+    });
 
-    function next() {
+    const next: Next = () => {
       serveStatic(res, pathname);
-    }
+    };
 
     if (area === "auth") {
       authRoutes({
         sessionSecret,
         clientId,
         clientSecret,
-        getRequestContext: () => ({ origin, redirectUri, cookieOpts, basePath: "/api/auth" }),
+        getRequestContext: () => ({
+          origin,
+          redirectUri,
+          cookieOpts,
+          basePath: "/api/auth",
+        }),
         getSessionIdFromRequest: (r) => getSessionIdFromRequest(r, sessionSecret),
         getSession,
         destroySession,
@@ -113,7 +153,7 @@ function handleRequest(req, res) {
         setOAuthState,
         createSession,
         exchangeCodeForToken: (code, uri) =>
-          exchangeCodeForToken(code, uri, clientId, clientSecret, fetch),
+          exchangeCodeForToken(code, uri, clientId!, clientSecret!, fetch),
         getGitHubUser: (token) => getGitHubUser(token, fetch),
         handleCallback,
         handleMe,
@@ -129,7 +169,8 @@ function handleRequest(req, res) {
 
     if (area === "jobs") {
       jobsRoutes({
-        getSessionIdFromRequest: (r) => getSessionIdFromRequest(r, sessionSecret),
+        getSessionIdFromRequest: (r) =>
+          getSessionIdFromRequest(r, sessionSecret),
         getLatestJob,
         getJob,
         respondJson,
@@ -154,7 +195,8 @@ function handleRequest(req, res) {
         readJsonBody,
         respondJson,
         DATE_YYYY_MM_DD,
-        getSessionIdFromRequest: (r) => getSessionIdFromRequest(r, sessionSecret),
+        getSessionIdFromRequest: (r) =>
+          getSessionIdFromRequest(r, sessionSecret),
         getSession,
         createJob,
         runInBackground,

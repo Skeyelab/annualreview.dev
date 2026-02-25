@@ -4,7 +4,7 @@
 import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import Landing from "../src/Landing.jsx";
+import Landing from "../src/Landing.tsx";
 
 describe("Landing", () => {
   it("renders brand name and primary CTA", () => {

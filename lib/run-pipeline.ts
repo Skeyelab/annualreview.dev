@@ -223,9 +223,10 @@ export async function runPipeline(
     : new OpenAI({ apiKey });
 
   const total = STEPS.length;
-  const posthogOpts: Record<string, string> = {};
+  const posthogOpts: Record<string, string | boolean> = {};
   if (posthogTraceId != null) posthogOpts.posthogTraceId = posthogTraceId;
   if (posthogDistinctId != null) posthogOpts.posthogDistinctId = posthogDistinctId;
+  if (phClient) posthogOpts.posthogCaptureImmediate = true; // send each generation immediately so we don't rely on shutdown flush
 
   try {
   const totalStart = Date.now();

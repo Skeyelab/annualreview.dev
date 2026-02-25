@@ -4,7 +4,7 @@ import { join } from "path";
 import { tmpdir } from "os";
 import { randomUUID } from "crypto";
 import { execSync } from "child_process";
-import { normalize } from "../scripts/normalize.js";
+import { normalize } from "../scripts/normalize.ts";
 
 describe("normalize", () => {
   it("outputs timeframe and contributions from empty raw", () => {
@@ -101,7 +101,7 @@ describe("normalize CLI", () => {
         ],
       })
     );
-    execSync(`node --import tsx/esm scripts/normalize.js --input ${rawPath} --output ${outPath}`, { cwd: join(process.cwd()), env: { ...process.env, NODE_OPTIONS: "" } });
+    execSync(`node --import tsx/esm scripts/normalize.ts --input ${rawPath} --output ${outPath}`, { cwd: join(process.cwd()), env: { ...process.env, NODE_OPTIONS: "" } });
     const evidence = JSON.parse(readFileSync(outPath, "utf8"));
     expect(evidence.contributions).toHaveLength(1);
     expect(evidence.contributions[0].id).toBe("a/b#1");

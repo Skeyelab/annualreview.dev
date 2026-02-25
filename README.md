@@ -25,11 +25,11 @@ This repo contains:
 The app needs a Node server in production so `/api/auth/*` and other API routes work. Use the included server:
 
 - **Build:** `yarn build`
-- **Run:** `yarn start` (or `node server.js`) — serves `dist/` and API on `PORT` (default 3000).
+- **Run:** `yarn start` (or `node --import tsx/esm server.ts`) — serves `dist/` and API on `PORT` (default 3000).
 
 **Required env in production:** `SESSION_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `OPENAI_API_KEY`. In GitHub OAuth App settings, set **Authorization callback URL** to `https://<your-domain>/api/auth/callback/github`. See [docs/oauth-scopes.md](docs/oauth-scopes.md).
 
-**Optional (analytics):** `VITE_POSTHOG_API_KEY` (or `POSTHOG_API_KEY`) — enables client-side PostHog (pageviews and autocapture). For EU host use `VITE_POSTHOG_HOST=https://eu.i.posthog.com`. For server-side LLM analytics (Traces/Generations in PostHog), set `POSTHOG_API_KEY` and optionally `POSTHOG_HOST` (default `https://us.i.posthog.com`). Same project token as frontend is fine.
+**Optional (analytics):** `VITE_POSTHOG_API_KEY` (or `POSTHOG_API_KEY`) — enables client-side PostHog (pageviews and autocapture). For EU host use `VITE_POSTHOG_HOST=https://eu.i.posthog.com`. For server-side LLM analytics (Traces/Generations in PostHog), set `POSTHOG_API_KEY` and optionally `POSTHOG_HOST` (default `https://us.i.posthog.com`). Same project token as frontend is fine. In PostHog, open **Product → LLM analytics** (or filter Events by `$ai_generation`) to see pipeline generations.
 
 ## Scripts
 

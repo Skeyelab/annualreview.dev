@@ -1,4 +1,4 @@
-// Marketing landing: hero, features, how-it-works, CTA. Sticky “Generate” bar after scrolling past hero.
+// Marketing landing: hero, features, how-it-works, CTA. Sticky "Generate" bar after scrolling past hero.
 import React, { useState, useEffect } from "react";
 import "./Landing.css";
 import { posthog } from "./posthog";
@@ -29,18 +29,37 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { verb: "Connect", detail: "Sign in with GitHub (public or private), or paste a token. CLI option keeps your token on your machine." },
-  { verb: "Fetch", detail: "Set your review date range and fetch your PRs and reviews in one click." },
-  { verb: "Generate", detail: "One click: themes, bullets, STAR stories, and self-eval sections—all evidence-linked." },
-  { verb: "Ship it", detail: "Copy sections or download the full report as Markdown. Done before lunch." },
+  {
+    verb: "Connect",
+    detail:
+      "Sign in with GitHub (public or private), or paste a token. CLI option keeps your token on your machine.",
+  },
+  {
+    verb: "Fetch",
+    detail:
+      "Set your review date range and fetch your PRs and reviews in one click.",
+  },
+  {
+    verb: "Generate",
+    detail:
+      "One click: themes, bullets, STAR stories, and self-eval sections—all evidence-linked.",
+  },
+  {
+    verb: "Ship it",
+    detail:
+      "Copy sections or download the full report as Markdown. Done before lunch.",
+  },
 ];
 
 export default function Landing() {
   const [showStickyCta, setShowStickyCta] = useState(false);
-  const authError = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("error") === "auth_failed";
+  const authError =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("error") === "auth_failed";
 
   useEffect(() => {
-    const onScroll = () => setShowStickyCta(window.scrollY > SCROLL_Y_SHOW_STICKY_CTA);
+    const onScroll = () =>
+      setShowStickyCta(window.scrollY > SCROLL_Y_SHOW_STICKY_CTA);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -51,8 +70,16 @@ export default function Landing() {
       {showStickyCta && (
         <div className="sticky-cta" role="banner">
           <div className="sticky-cta-inner">
-            <span className="sticky-cta-text">Turn your GitHub activity into a review in 5 minutes.</span>
-            <a href="/generate" className="btn btn-primary" onClick={() => posthog?.capture("cta_clicked", { location: "sticky" })}>
+            <span className="sticky-cta-text">
+              Turn your GitHub activity into a review in 5 minutes.
+            </span>
+            <a
+              href="/generate"
+              className="btn btn-primary"
+              onClick={() =>
+                posthog?.capture("cta_clicked", { location: "sticky" })
+              }
+            >
               Generate my review <span className="btn-arrow">→</span>
             </a>
           </div>
@@ -60,7 +87,11 @@ export default function Landing() {
       )}
       {authError && (
         <div className="auth-error-banner" role="alert">
-          <p>GitHub sign-in didn’t complete. Try again from the Generate page, or check that your production URL is set as the callback URL in your GitHub OAuth app.</p>
+          <p>
+            GitHub sign-in didn't complete. Try again from the Generate page, or
+            check that your production URL is set as the callback URL in your
+            GitHub OAuth app.
+          </p>
           <a href="/">Dismiss</a>
         </div>
       )}
@@ -73,7 +104,15 @@ export default function Landing() {
           <div className="nav-links">
             <a href="#features">Features</a>
             <a href="#how">How it works</a>
-            <a href="/generate" className="nav-cta" onClick={() => posthog?.capture("cta_clicked", { location: "nav" })}>Get started</a>
+            <a
+              href="/generate"
+              className="nav-cta"
+              onClick={() =>
+                posthog?.capture("cta_clicked", { location: "nav" })
+              }
+            >
+              Get started
+            </a>
           </div>
         </div>
       </nav>
@@ -85,20 +124,30 @@ export default function Landing() {
           <div className="container hero-content">
             <p className="hero-kicker">GitHub → evidence → narrative</p>
             <h1 className="hero-title">
-              Stop putting off<br />your self-review.
+              Stop putting off
+              <br />
+              your self-review.
             </h1>
             <p className="hero-sub">
-              You shipped all year. You shouldn't have to spend a week
-              proving it. <strong>Free, no signup.</strong> Sign in with GitHub,
-              use a token, or run the CLI. Get themes, bullets, STAR stories, and
+              You shipped all year. You shouldn't have to spend a week proving
+              it. <strong>Free, no signup.</strong> Sign in with GitHub, use a
+              token, or run the CLI. Get themes, bullets, STAR stories, and
               self-eval sections—every claim linked to a real PR.
             </p>
             <div className="hero-actions">
-              <a href="/generate" className="btn btn-primary btn-lg" onClick={() => posthog?.capture("cta_clicked", { location: "hero" })}>
+              <a
+                href="/generate"
+                className="btn btn-primary btn-lg"
+                onClick={() =>
+                  posthog?.capture("cta_clicked", { location: "hero" })
+                }
+              >
                 Generate my review
                 <span className="btn-arrow">→</span>
               </a>
-              <a href="#how" className="hero-secondary-link">See how it works</a>
+              <a href="#how" className="hero-secondary-link">
+                See how it works
+              </a>
             </div>
           </div>
         </section>
@@ -117,9 +166,7 @@ export default function Landing() {
         <section id="features" className="section">
           <div className="container">
             <p className="section-kicker">What you get</p>
-            <h2 className="section-title">
-              Four outputs. Zero guesswork.
-            </h2>
+            <h2 className="section-title">Four outputs. Zero guesswork.</h2>
             <div className="feature-grid">
               {FEATURES.map((f) => (
                 <div key={f.title} className="feature-card">
@@ -136,7 +183,9 @@ export default function Landing() {
         <section className="section section-alt">
           <div className="container">
             <p className="section-kicker">The transformation</p>
-            <h2 className="section-title">From commit log to career narrative</h2>
+            <h2 className="section-title">
+              From commit log to career narrative
+            </h2>
             <div className="compare-grid">
               <div className="compare-card compare-before">
                 <span className="compare-label">Before</span>
@@ -151,17 +200,21 @@ export default function Landing() {
               <div className="compare-card compare-after">
                 <span className="compare-label">After</span>
                 <div className="compare-body">
-                  <p><strong>Platform Reliability</strong></p>
                   <p>
-                    Improved webhook delivery success rate by adding
-                    retry logic with exponential backoff, reducing
-                    failed deliveries across 3 integration partners.
+                    <strong>Platform Reliability</strong>
+                  </p>
+                  <p>
+                    Improved webhook delivery success rate by adding retry logic
+                    with exponential backoff, reducing failed deliveries across 3
+                    integration partners.
                     <span className="evidence-tag">PR #412</span>
                   </p>
-                  <p><strong>Architecture</strong></p>
                   <p>
-                    Led extraction of billing service from the monolith,
-                    enabling independent deployment and reducing blast radius.
+                    <strong>Architecture</strong>
+                  </p>
+                  <p>
+                    Led extraction of billing service from the monolith, enabling
+                    independent deployment and reducing blast radius.
                     <span className="evidence-tag">PR #389</span>
                   </p>
                 </div>
@@ -197,7 +250,10 @@ export default function Landing() {
             <div className="trust-grid">
               <div className="trust-item">
                 <strong>No hallucinated metrics</strong>
-                <p>If we can't link it to a PR, it doesn't appear in your review.</p>
+                <p>
+                  If we can't link it to a PR, it doesn't appear in your
+                  review.
+                </p>
               </div>
               <div className="trust-item">
                 <strong>Flagged uncertainty</strong>
@@ -208,7 +264,9 @@ export default function Landing() {
               </div>
               <div className="trust-item">
                 <strong>Your data, your machine</strong>
-                <p>Runs locally or on your infra. Nothing stored, nothing shared.</p>
+                <p>
+                  Runs locally or on your infra. Nothing stored, nothing shared.
+                </p>
               </div>
             </div>
           </div>
@@ -218,9 +276,17 @@ export default function Landing() {
         <section className="final-cta">
           <div className="container">
             <h2 className="final-cta-title">
-              Review season is coming.<br />Be ready in 5 minutes.
+              Review season is coming.
+              <br />
+              Be ready in 5 minutes.
             </h2>
-            <a href="/generate" className="btn btn-primary btn-lg" onClick={() => posthog?.capture("cta_clicked", { location: "final" })}>
+            <a
+              href="/generate"
+              className="btn btn-primary btn-lg"
+              onClick={() =>
+                posthog?.capture("cta_clicked", { location: "final" })
+              }
+            >
               Generate my review
               <span className="btn-arrow">→</span>
             </a>
@@ -235,7 +301,14 @@ export default function Landing() {
           </a>
           <p className="footer-sub">
             For engineers who ship more than they self-promote.{" "}
-            <a href="https://github.com/Skeyelab/annualreview.com" target="_blank" rel="noopener noreferrer">Open source</a>.
+            <a
+              href="https://github.com/Skeyelab/annualreview.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open source
+            </a>
+            .
           </p>
         </div>
       </footer>

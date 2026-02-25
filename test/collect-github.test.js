@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { collectRawGraphQL, parseArgs } from "../scripts/collect-github.js";
-import { normalize } from "../scripts/normalize.js";
+import { collectRawGraphQL, parseArgs } from "../scripts/collect-github.ts";
+import { normalize } from "../scripts/normalize.ts";
 
 describe("parseArgs", () => {
   it("parses --start, --end, --output, --no-reviews", () => {

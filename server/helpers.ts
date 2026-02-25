@@ -1,5 +1,5 @@
 /**
- * Shared helpers for API routes. Used by both Vite dev server and production server.js.
+ * Shared helpers for API routes. Used by both Vite dev server and production server.ts.
  */
 
 import type { IncomingMessage, ServerResponse } from "http";

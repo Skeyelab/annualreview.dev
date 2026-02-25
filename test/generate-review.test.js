@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, readdirSync } from "fs"
 import { join } from "path";
 import { tmpdir } from "os";
 import { randomUUID } from "crypto";
-import { runGenerateReview, parseArgs } from "../scripts/generate-review.js";
+import { runGenerateReview, parseArgs } from "../scripts/generate-review.ts";
 
 describe("parseArgs", () => {
   it("defaults input to evidence.json and outDir to ./out", () => {

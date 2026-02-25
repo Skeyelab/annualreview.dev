@@ -12,6 +12,8 @@ The repo includes `nixpacks.toml` so Nixpacks runs `yarn build` and then `yarn s
    - `GITHUB_CLIENT_ID` — from [GitHub OAuth App](https://github.com/settings/developers)
    - `GITHUB_CLIENT_SECRET` — from the same OAuth App
    - `OPENAI_API_KEY` — for the generate pipeline
+   - `POSTHOG_API_KEY` — (optional) same project token as frontend; enables LLM analytics (Traces/Generations in PostHog). If missing, pipeline runs but no LLM events are sent.
+   - `POSTHOG_HOST` — (optional) default `https://us.i.posthog.com`; use `https://eu.i.posthog.com` for EU.
 
 3. **GitHub OAuth App**
    - Create an OAuth App (or use existing). Set **Authorization callback URL** to:
