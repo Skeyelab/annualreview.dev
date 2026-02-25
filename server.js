@@ -1,9 +1,10 @@
 /**
  * Production server: serves Vite build, POST /api/generate, OAuth + import.
  * Usage: PORT=3000 node server.js (after yarn build)
- * OAuth: set GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SESSION_SECRET.
+ * OAuth: set GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SESSION_SECRET in .env or env.
  */
 
+import "dotenv/config";
 import express from "express";
 import session from "express-session";
 import { join, dirname } from "path";
