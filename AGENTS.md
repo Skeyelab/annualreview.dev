@@ -1,4 +1,4 @@
-# AGENTS.md — Annual Review Story
+# AGENTS.md — AnnualReview
 
 ## Mission
 Turn GitHub contribution evidence into an evidence-backed annual review draft: themes, impact bullets, STAR stories, and an appendix of links.

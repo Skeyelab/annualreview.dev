@@ -9,19 +9,9 @@
  */
 
 import { writeFileSync } from "fs";
-import { join } from "path";
+import { fileURLToPath } from "url";
 
 const GITHUB_API = "https://api.github.com";
-const token = process.env.GITHUB_TOKEN;
-if (!token) {
-  console.error("GITHUB_TOKEN required");
-  process.exit(1);
-}
-
-const headers = {
-  Accept: "application/vnd.github.v3+json",
-  Authorization: `Bearer ${token}`,
-};
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -35,37 +25,38 @@ function parseArgs() {
   return { start, end, output, noReviews };
 }
 
-async function fetchJson(url, opts = {}) {
-  const res = await fetch(url, { ...opts, headers: { ...headers, ...opts.headers } });
-  if (!res.ok) throw new Error(`${url} ${res.status}: ${await res.text()}`);
-  return res.json();
-}
+export { parseArgs };
 
-async function fetchSearchIssues(q, maxPages = 10) {
-  const out = [];
-  for (let page = 1; page <= maxPages; page++) {
-    const url = `${GITHUB_API}/search/issues?q=${encodeURIComponent(q)}&page=${page}&per_page=100`;
-    const data = await fetchJson(url);
-    const items = data.items ?? [];
-    if (items.length === 0) break;
-    out.push(...items);
-    if (items.length < 100) break;
+/**
+ * @param {{ start: string, end: string, noReviews?: boolean, token: string, fetchFn?: typeof fetch }} opts
+ * @returns {Promise<{ timeframe: { start_date: string, end_date: string }, pull_requests: unknown[], reviews: unknown[] }>}
+ */
+export async function collectRaw({ start, end, noReviews = false, token, fetchFn = fetch }) {
+  const headers = {
+    Accept: "application/vnd.github.v3+json",
+    Authorization: `Bearer ${token}`,
+  };
+  async function fetchJson(url, opts = {}) {
+    const res = await fetchFn(url, { ...opts, headers: { ...headers, ...opts.headers } });
+    if (!res.ok) throw new Error(`${url} ${res.status}: ${await res.text()}`);
+    return res.json();
   }
-  return out;
-}
-
-async function main() {
-  const { start, end, output, noReviews } = parseArgs();
-  if (!start || !end) {
-    console.error("--start YYYY-MM-DD and --end YYYY-MM-DD required");
-    process.exit(1);
+  async function fetchSearchIssues(q, maxPages = 10) {
+    const out = [];
+    for (let page = 1; page <= maxPages; page++) {
+      const url = `${GITHUB_API}/search/issues?q=${encodeURIComponent(q)}&page=${page}&per_page=100`;
+      const data = await fetchJson(url);
+      const items = data.items ?? [];
+      if (items.length === 0) break;
+      out.push(...items);
+      if (items.length < 100) break;
+    }
+    return out;
   }
 
   const user = await fetchJson(`${GITHUB_API}/user`);
   const login = user.login;
   const q = `author:${login} type:pr created:${start}..${end}`;
-  console.error("Fetching PRs:", q);
-
   const issues = await fetchSearchIssues(q, 5);
   const prs = issues.filter((i) => i.pull_request);
 
@@ -78,7 +69,6 @@ async function main() {
 
   let reviews = [];
   if (!noReviews && pull_requests.length > 0) {
-    console.error("Fetching reviews for", pull_requests.length, "PRs...");
     for (const pr of pull_requests) {
       const [owner, repo] = pr.base.repo.full_name.split("/");
       const r = await fetchJson(`${GITHUB_API}/repos/${owner}/${repo}/pulls/${pr.number}/reviews`);
@@ -88,12 +78,25 @@ async function main() {
     }
   }
 
-  const raw = {
+  return {
     timeframe: { start_date: start, end_date: end },
     pull_requests,
     reviews,
   };
+}
 
+async function main() {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    console.error("GITHUB_TOKEN required");
+    process.exit(1);
+  }
+  const { start, end, output, noReviews } = parseArgs();
+  if (!start || !end) {
+    console.error("--start YYYY-MM-DD and --end YYYY-MM-DD required");
+    process.exit(1);
+  }
+  const raw = await collectRaw({ start, end, noReviews, token });
   const json = JSON.stringify(raw, null, 2);
   if (output) {
     writeFileSync(output, json);
@@ -103,7 +106,5 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+if (isMain) main().catch((e) => { console.error(e); process.exit(1); });

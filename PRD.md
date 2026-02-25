@@ -1,7 +1,7 @@
-# PRD: Annual Review Story (GitHub → Evidence → Narrative)
+# PRD: AnnualReview (GitHub → Evidence → Narrative)
 
 ## 1) Overview
-Annual Review Story is a web app that connects to a developer’s GitHub account, analyzes their work over a selected time window (e.g., last calendar year), and generates an evidence-backed annual review draft: themes, impact bullets, STAR stories, and an appendix of links. The product turns raw activity into an “impact narrative” that is safe (no hallucinated claims) and easy to paste into HR systems.
+AnnualReview is a web app that connects to a developer’s GitHub account, analyzes their work over a selected time window (e.g., last calendar year), and generates an evidence-backed annual review draft: themes, impact bullets, STAR stories, and an appendix of links. The product turns raw activity into an “impact narrative” that is safe (no hallucinated claims) and easy to paste into HR systems.
 
 ## 2) Problem
 Developers struggle to write annual reviews because:
@@ -87,7 +87,7 @@ Developers struggle to write annual reviews because:
 - Basic redaction + exclusions
 
 ### Out (later)
-- Slack/Jira ingestion
+- Slack/Jira (and other sources) ingestion — see `docs/multi-source-plan.md`
 - Team-wide rollups
 - Automated metric lookups (CI, incident tools)
 - Manager dashboard

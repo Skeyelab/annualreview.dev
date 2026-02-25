@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/Skeyelab/annual-review-story-kit/schemas/evidence.json",
   "title": "Evidence",
   "description": "Input contract for the annual-review pipeline: timeframe, optional role context, and flat contributions array. See AGENTS.md.",
@@ -29,11 +29,11 @@
     },
     "contributions": {
       "type": "array",
-      "items": { "$ref": "#/$defs/contribution" }
+      "items": { "$ref": "#/definitions/contribution" }
     }
   },
   "additionalProperties": false,
-  "$defs": {
+  "definitions": {
     "contribution": {
       "type": "object",
       "required": ["id", "type", "title", "url", "repo"],

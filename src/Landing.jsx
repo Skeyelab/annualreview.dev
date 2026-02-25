@@ -1,3 +1,4 @@
+import React from "react";
 import "./Landing.css";
 
 export default function Landing() {
@@ -6,7 +7,7 @@ export default function Landing() {
       <header className="landing-header">
         <div className="landing-logo">
           <span className="landing-logo-icon">⟡</span>
-          <span className="landing-logo-text">Annual Review Story</span>
+          <span className="landing-logo-text">AnnualReview.dev</span>
         </div>
       </header>
 
@@ -66,7 +67,7 @@ export default function Landing() {
 
       <footer className="landing-footer">
         <p>
-          For ICs, tech leads, and contractors writing self-evals and promotion packets.
+          <a href="https://annualreview.dev">AnnualReview.dev</a> — For ICs, tech leads, and contractors writing self-evals and promotion packets.
         </p>
       </footer>
     </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import "./Generate.css";
 
 export default function Generate() {
@@ -62,7 +62,7 @@ export default function Generate() {
       <header className="generate-header">
         <a href="/" className="generate-logo">
           <span className="generate-logo-icon">⟡</span>
-          Annual Review Story
+          AnnualReview.dev
         </a>
         <a href="/" className="generate-back">← Back</a>
       </header>
