@@ -1,8 +1,4 @@
-.generate {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+/* Layout: .generate → primitives.css */
 
 .generate-header {
   display: flex;
@@ -101,7 +97,7 @@
 
 .generate-main {
   flex: 1;
-  max-width: 48rem;
+  max-width: 66rem;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
   width: 100%;
@@ -143,10 +139,38 @@
   color: var(--text);
 }
 
-.generate-get-data-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+.generate-get-data-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.generate-get-data-tab {
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.generate-get-data-tab:hover {
+  color: var(--text);
+}
+
+.generate-get-data-tab-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.generate-get-data-panels {
+  margin-top: 0;
 }
 
 .generate-option-card {
@@ -354,6 +378,29 @@
   color: var(--text-muted);
 }
 
+.generate-goals-section {
+  margin-bottom: 1rem;
+}
+
+.generate-goals-label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: var(--text);
+}
+
+.generate-goals-optional {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
+.generate-goals-textarea {
+  font-family: var(--font-sans);
+  margin-bottom: 0.35rem;
+}
+
 .generate-error {
   color: #e57373;
   margin: 0 0 1rem;
@@ -481,6 +528,37 @@
   color: var(--accent);
 }
 
+.generate-report-section {
+  border-top: 1px dashed var(--border);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.generate-report-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.generate-download-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.generate-download-btn:hover {
+  background: var(--accent-dim);
+}
+
+.generate-report-pre {
+  max-height: 30rem;
+}
+
 .generate-footer-note {
   margin: 2rem 0 0;
   font-size: 0.8rem;
@@ -496,7 +574,7 @@
 }
 
 @media (max-width: 768px) {
-  .generate-get-data-options {
-    grid-template-columns: 1fr;
+  .generate-get-data-tabs {
+    flex-wrap: wrap;
   }
 }

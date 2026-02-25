@@ -7,9 +7,20 @@
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-import { runPipeline } from "../lib/run-pipeline.js";
+import { parseArgs as parseArgsBase } from "../lib/parse-args.ts";
+import { runPipeline } from "../lib/run-pipeline.ts";
+import { generateMarkdown } from "../lib/generate-markdown.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const GENERATE_REVIEW_SCHEMA = {
+  flags: [{ name: "outDir", option: "--out", type: "string" }],
+  positionals: [{ name: "input" }],
+  defaults: {
+    input: () => join(process.cwd(), "evidence.json"),
+    outDir: () => join(process.cwd(), "out"),
+  },
+};
 
 const STEP_LABELS = ["Themes", "Impact bullets", "STAR stories", "Self-eval sections"];
 const BAR_WIDTH = 16;
@@ -65,18 +76,8 @@ function onStepProgress(stepIndex, total, label, contributionCount = 0) {
   }
 }
 
-function parseArgs() {
-  const args = process.argv.slice(2);
-  let input = null;
-  let outDir = join(process.cwd(), "out");
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--out" && args[i + 1]) {
-      outDir = args[++i];
-    } else if (!args[i].startsWith("--")) {
-      input = args[i];
-    }
-  }
-  return { input: input || join(process.cwd(), "evidence.json"), outDir };
+function parseArgs(argv) {
+  return parseArgsBase(GENERATE_REVIEW_SCHEMA, argv);
 }
 
 export { parseArgs };
@@ -89,6 +90,8 @@ export async function runGenerateReview(inputPath, outDir, pipelineFn = runPipel
   writeFileSync(join(outDir, "bullets.json"), JSON.stringify(bullets, null, 2));
   writeFileSync(join(outDir, "stories.json"), JSON.stringify(stories, null, 2));
   writeFileSync(join(outDir, "self_eval.json"), JSON.stringify(self_eval, null, 2));
+  const markdown = generateMarkdown({ themes, bullets, stories, self_eval }, { timeframe: evidence.timeframe });
+  writeFileSync(join(outDir, "report.md"), markdown);
   return { themes, bullets, stories, self_eval };
 }
 
@@ -112,7 +115,7 @@ async function main() {
   } else {
     process.stdout.write(`\r  ✓ [4/4] ${STEP_LABELS[3]}${" ".repeat(24)}\n`);
   }
-  console.log("Wrote themes.json, bullets.json, stories.json, self_eval.json to", outDir);
+  console.log("Wrote themes.json, bullets.json, stories.json, self_eval.json, report.md to", outDir);
 }
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];

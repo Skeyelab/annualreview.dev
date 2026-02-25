@@ -48,7 +48,7 @@ describe("runGenerateReview", () => {
     expect(result.themes.themes).toHaveLength(1);
     expect(result.self_eval.sections.summary.text).toBe("Done");
     const files = readdirSync(outDir);
-    expect(files.sort()).toEqual(["bullets.json", "self_eval.json", "stories.json", "themes.json"]);
+    expect(files.sort()).toEqual(["bullets.json", "report.md", "self_eval.json", "stories.json", "themes.json"]);
     const themesContent = JSON.parse(readFileSync(join(outDir, "themes.json"), "utf8"));
     expect(themesContent.themes[0].theme_name).toBe("Reliability");
     rmSync(dir, { recursive: true });

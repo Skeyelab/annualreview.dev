@@ -27,6 +27,10 @@
       },
       "additionalProperties": false
     },
+    "goals": {
+      "type": "string",
+      "description": "Optional annual goals provided by the user. Used as context to frame the review output."
+    },
     "contributions": {
       "type": "array",
       "items": { "$ref": "#/definitions/contribution" }

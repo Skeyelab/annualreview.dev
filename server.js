@@ -1,140 +1,173 @@
 /**
- * Production server: serves Vite build, POST /api/generate, OAuth + import.
- * Usage: PORT=3000 node server.js (after yarn build)
- * OAuth: set GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SESSION_SECRET in .env or env.
+ * Production server: serves dist/ and the same API routes as the Vite dev server.
+ * For Coolify (or any Node host): run `yarn build && node server.js`.
+ * Set PORT (default 3000), SESSION_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, OPENAI_API_KEY.
  */
-
-import "dotenv/config";
-import express from "express";
-import session from "express-session";
-import { join, dirname } from "path";
+import { createServer } from "http";
+import { readFile } from "fs/promises";
+import { join, extname } from "path";
 import { fileURLToPath } from "url";
-import { runPipeline } from "./lib/run-pipeline.js";
-import { collectRaw } from "./scripts/collect-github.js";
-import { normalize } from "./scripts/normalize.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const dist = join(__dirname, "dist");
-const PORT = Number(process.env.PORT) || 3000;
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const DIST = join(__dirname, "dist");
 
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
-const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
-const SESSION_SECRET = process.env.SESSION_SECRET || "dev-secret-change-in-production";
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+import { runPipeline } from "./lib/run-pipeline.ts";
+import { collectAndNormalize } from "./lib/collect-and-normalize.ts";
+import { validateEvidence } from "./lib/validate-evidence.ts";
+import { createJob, getJob, getLatestJob, runInBackground } from "./lib/job-store.ts";
+import { createSession, getSession, destroySession, setOAuthState, getAndRemoveOAuthState } from "./lib/session-store.ts";
+import {
+  getAuthRedirectUrl,
+  buildCallbackRequest,
+  exchangeCodeForToken,
+  getGitHubUser,
+  handleCallback,
+  handleMe,
+  handleLogout,
+} from "./lib/auth.ts";
+import {
+  getSessionIdFromRequest,
+  setSessionCookie,
+  clearSessionCookie,
+  setStateCookie,
+  getStateFromRequest,
+  clearStateCookie,
+} from "./lib/cookies.ts";
+import { readJsonBody, respondJson, randomState, DATE_YYYY_MM_DD } from "./server/helpers.ts";
+import { authRoutes } from "./server/routes/auth.js";
+import { jobsRoutes } from "./server/routes/jobs.js";
+import { generateRoutes } from "./server/routes/generate.js";
+import { collectRoutes } from "./server/routes/collect.js";
 
-const app = express();
-app.use(express.json({ limit: "2mb" }));
-app.set("trust proxy", 1);
-app.use(
-  session({
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === "production", maxAge: 24 * 60 * 60 * 1000 },
-  })
-);
-app.use(express.static(dist));
+const MIME = {
+  ".html": "text/html",
+  ".js": "application/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+  ".ico": "image/x-icon",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".woff2": "font/woff2",
+};
 
-// ——— OAuth ———
-app.get("/api/auth/github", (req, res) => {
-  if (!GITHUB_CLIENT_ID) {
-    res.status(503).json({ error: "OAuth not configured. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET." });
-    return;
-  }
-  const redirectUri = `${BASE_URL.replace(/\/$/, "")}/api/auth/github/callback`;
-  const scope = "read:user public_repo";
-  const url = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(GITHUB_CLIENT_ID)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}`;
-  res.redirect(url);
-});
-
-app.get("/api/auth/github/callback", async (req, res) => {
-  if (!GITHUB_CLIENT_SECRET) {
-    res.redirect("/generate?error=oauth_not_configured");
-    return;
-  }
-  const { code } = req.query;
-  if (!code) {
-    res.redirect("/generate?error=missing_code");
-    return;
-  }
-  const redirectUri = `${BASE_URL.replace(/\/$/, "")}/api/auth/github/callback`;
+async function serveStatic(res, pathname) {
+  const rel = pathname === "/" || pathname === "" ? "index.html" : pathname.replace(/^\//, "");
+  const filePath = join(DIST, rel);
   try {
-    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({
-        client_id: GITHUB_CLIENT_ID,
-        client_secret: GITHUB_CLIENT_SECRET,
-        code,
-        redirect_uri: redirectUri,
-      }),
-    });
-    const tokenData = await tokenRes.json();
-    if (tokenData.error) {
-      res.redirect(`/generate?error=${encodeURIComponent(tokenData.error_description || tokenData.error)}`);
+    const data = await readFile(filePath);
+    res.setHeader("Content-Type", MIME[extname(filePath)] || "application/octet-stream");
+    res.end(data);
+  } catch (e) {
+    if (e.code === "ENOENT") {
+      const index = await readFile(join(DIST, "index.html"));
+      res.setHeader("Content-Type", "text/html");
+      res.end(index);
+    } else {
+      res.statusCode = 500;
+      res.end();
+    }
+  }
+}
+
+function handleRequest(req, res) {
+  const url = req.url || "/";
+  const [pathname, qs] = url.split("?");
+  const path = pathname.replace(/^\/+/, "");
+
+  const sessionSecret = process.env.SESSION_SECRET || "dev-secret";
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+  const isSecure = req.headers["x-forwarded-proto"] === "https";
+  const host = req.headers.host || "localhost:3000";
+  const origin = `${isSecure ? "https" : "http"}://${host}`;
+  const redirectUri = `${origin}/api/auth/callback/github`;
+  const cookieOpts = { secure: isSecure };
+  const log = (event, detail) => console.error("[auth] " + event + (detail ? " " + detail : ""));
+
+  if (path.startsWith("api/")) {
+    const sub = path.slice(4);
+    const [area, ...rest] = sub.split("/");
+    const restPath = rest.join("/");
+    const pathAndQs = restPath + (qs ? "?" + qs : "");
+    const wrappedReq = Object.assign(Object.create(req), { url: pathAndQs ? "/" + pathAndQs : "/" });
+
+    function next() {
+      serveStatic(res, pathname);
+    }
+
+    if (area === "auth") {
+      authRoutes({
+        sessionSecret,
+        clientId,
+        clientSecret,
+        getRequestContext: () => ({ origin, redirectUri, cookieOpts, basePath: "/api/auth" }),
+        getSessionIdFromRequest: (r) => getSessionIdFromRequest(r, sessionSecret),
+        getSession,
+        destroySession,
+        setSessionCookie,
+        clearSessionCookie,
+        setStateCookie,
+        getStateFromRequest: (r) => getStateFromRequest(r, sessionSecret, { log }),
+        clearStateCookie,
+        getAndRemoveOAuthState,
+        setOAuthState,
+        createSession,
+        exchangeCodeForToken: (code, uri) =>
+          exchangeCodeForToken(code, uri, clientId, clientSecret, fetch),
+        getGitHubUser: (token) => getGitHubUser(token, fetch),
+        handleCallback,
+        handleMe,
+        handleLogout,
+        getAuthRedirectUrl,
+        respondJson,
+        randomState,
+        buildCallbackRequest,
+        log,
+      })(wrappedReq, res, next);
       return;
     }
-    req.session.githubAccessToken = tokenData.access_token;
-    res.redirect("/generate");
-  } catch (e) {
-    res.redirect(`/generate?error=${encodeURIComponent(e.message || "Token exchange failed")}`);
-  }
-});
 
-app.post("/api/auth/logout", (req, res) => {
-  req.session.destroy(() => {});
-  res.redirect("/");
-});
+    if (area === "jobs") {
+      jobsRoutes({
+        getSessionIdFromRequest: (r) => getSessionIdFromRequest(r, sessionSecret),
+        getLatestJob,
+        getJob,
+        respondJson,
+      })(wrappedReq, res, next);
+      return;
+    }
 
-// ——— Import from GitHub ———
-app.post("/api/import", async (req, res) => {
-  const token = req.session?.githubAccessToken;
-  if (!token) {
-    res.status(401).json({ error: "Not signed in. Connect GitHub first." });
-    return;
-  }
-  const { start_date, end_date } = req.body || {};
-  if (!start_date || !end_date) {
-    res.status(400).json({ error: "start_date and end_date required (YYYY-MM-DD)." });
-    return;
-  }
-  try {
-    const raw = await collectRaw({
-      start: start_date,
-      end: end_date,
-      noReviews: false,
-      token,
-    });
-    const evidence = normalize(raw, start_date, end_date);
-    res.json(evidence);
-  } catch (e) {
-    res.status(500).json({ error: e.message || "Import failed." });
-  }
-});
+    if (area === "generate") {
+      generateRoutes({
+        readJsonBody,
+        respondJson,
+        validateEvidence,
+        createJob,
+        runInBackground,
+        runPipeline,
+      })(wrappedReq, res, next);
+      return;
+    }
 
-app.get("/api/me", (req, res) => {
-  if (req.session?.githubAccessToken) {
-    res.json({ connected: true });
-  } else {
-    res.json({ connected: false });
+    if (area === "collect") {
+      collectRoutes({
+        readJsonBody,
+        respondJson,
+        DATE_YYYY_MM_DD,
+        getSessionIdFromRequest: (r) => getSessionIdFromRequest(r, sessionSecret),
+        getSession,
+        createJob,
+        runInBackground,
+        collectAndNormalize,
+      })(wrappedReq, res, next);
+      return;
+    }
   }
-});
 
-// ——— Generate ———
-app.post("/api/generate", async (req, res) => {
-  try {
-    const evidence = req.body;
-    const result = await runPipeline(evidence);
-    res.json(result);
-  } catch (e) {
-    res.status(500).json({ error: e.message || "Pipeline failed" });
-  }
-});
+  serveStatic(res, pathname);
+}
 
-app.get("*", (_, res) => {
-  res.sendFile(join(dist, "index.html"));
-});
-
-app.listen(PORT, () => {
-  console.log(`Listening on http://0.0.0.0:${PORT}`);
+const port = Number(process.env.PORT) || 3000;
+createServer(handleRequest).listen(port, () => {
+  console.log(`Server listening on http://localhost:${port}`);
 });

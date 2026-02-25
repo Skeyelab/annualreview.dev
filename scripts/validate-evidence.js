@@ -3,7 +3,7 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { validateEvidence } from "../lib/validate-evidence.js";
+import { validateEvidence } from "../lib/validate-evidence.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const evidencePath = process.argv[2] || join(process.cwd(), "evidence.json");

@@ -31,6 +31,7 @@ Turn GitHub contribution evidence into an evidence-backed annual review draft: t
 {
   "timeframe": { "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD" },
   "role_context_optional": { "level": "...", "job_family": "...", "focus_areas": ["..."] },
+  "goals": "Optional free-text annual goals (e.g. 'Improve reliability, grow as a tech lead'). Used to frame themes, bullets, and stories.",
   "contributions": [
     {
       "id": "repo#1234",
@@ -51,6 +52,10 @@ Turn GitHub contribution evidence into an evidence-backed annual review draft: t
     }
   ]
 }
+
+## Development
+- **TDD when possible:** For new behavior or non-trivial changes, write or update tests first (Vitest in `test/`), then implement until tests pass. For bugfixes, add a failing test that reproduces the bug, then fix.
+- Run `yarn test` before committing; ensure builds and tests pass before opening PRs.
 
 ## Notes
 - Prefer PRs and reviews as primary evidence.

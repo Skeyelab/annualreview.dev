@@ -3,18 +3,23 @@
  * POST /api/collect or /api/generate starts a job and returns job_id; client polls GET /api/jobs/:id.
  */
 
-const jobs = new Map();
+export interface Job {
+  type: string;
+  status: string;
+  created_at: string;
+  created_by?: string;
+  progress?: string | null;
+  result?: unknown;
+  error?: string | null;
+}
 
-const STATUS = { PENDING: "pending", RUNNING: "running", DONE: "done", FAILED: "failed" };
+const jobs = new Map<string, Job>();
 
-/**
- * @param {string} type
- * @param {string} [sessionId]
- * @returns {string} job id
- */
-export function createJob(type, sessionId) {
+const STATUS = { PENDING: "pending", RUNNING: "running", DONE: "done", FAILED: "failed" } as const;
+
+export function createJob(type: string, sessionId?: string): string {
   const id = `job_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-  const record = {
+  const record: Job = {
     type,
     status: STATUS.PENDING,
     created_at: new Date().toISOString(),
@@ -27,20 +32,12 @@ export function createJob(type, sessionId) {
   return id;
 }
 
-/**
- * @typedef {{ type: string, status: string, created_at: string, created_by?: string, progress?: string | null, result?: unknown, error?: string | null }} Job
- * @returns {Job | undefined}
- */
-export function getJob(id) {
+export function getJob(id: string): Job | undefined {
   return jobs.get(id);
 }
 
-/**
- * @param {string} sessionId
- * @returns {(Job & { id: string }) | null}
- */
-export function getLatestJob(sessionId) {
-  const candidates = [];
+export function getLatestJob(sessionId: string): (Job & { id: string }) | null {
+  const candidates: (Job & { id: string })[] = [];
   for (const [id, job] of jobs) {
     if (job.created_by !== sessionId) continue;
     candidates.push({ id, ...job });
@@ -53,23 +50,23 @@ export function getLatestJob(sessionId) {
   return candidates[0];
 }
 
-/** @param {string} id @param {Partial<Job>} update */
-export function updateJob(id, update) {
+export function updateJob(id: string, update: Partial<Job>): void {
   const job = jobs.get(id);
   if (job) Object.assign(job, update);
 }
 
 /**
  * Run fn in the background; update job to running, then done/result or failed/error.
- * @param {string} id job id
- * @param {(report: (p: { progress?: string }) => void) => Promise<unknown>} fn async work; call report({ progress }) to update
  */
-export function runInBackground(id, fn) {
+export function runInBackground(
+  id: string,
+  fn: (report: (p: Partial<Job>) => void) => Promise<unknown>
+): void {
   updateJob(id, { status: STATUS.RUNNING });
-  const report = (update) => updateJob(id, update);
+  const report = (update: Partial<Job>) => updateJob(id, update);
   fn(report)
     .then((result) => updateJob(id, { status: STATUS.DONE, result, progress: null }))
-    .catch((err) =>
+    .catch((err: Error) =>
       updateJob(id, {
         status: STATUS.FAILED,
         error: err.message || "Job failed",

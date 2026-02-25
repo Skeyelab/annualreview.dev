@@ -1,16 +1,25 @@
-/* ─── Layout ─── */
+/* Layout: .landing, .container → primitives.css */
 
-.landing {
-  min-height: 100vh;
+.auth-error-banner {
+  background: var(--surface-warn, rgba(180, 80, 40, 0.15));
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.container {
-  max-width: 64rem;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  width: 100%;
+.auth-error-banner p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.auth-error-banner a {
+  color: var(--accent);
+  font-size: 0.9rem;
 }
 
 /* ─── Nav ─── */
@@ -197,59 +206,7 @@
   color: var(--accent);
 }
 
-/* ─── Buttons ─── */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-sans);
-  font-weight: 600;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none;
-}
-
-.btn-lg {
-  padding: 0.85rem 1.75rem;
-  font-size: 0.95rem;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: var(--bg);
-  border-color: var(--accent);
-  box-shadow: 0 0 24px rgba(201, 162, 39, 0.15), 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.btn-primary:hover {
-  background: #d4ad2e;
-  border-color: #d4ad2e;
-  color: var(--bg);
-  box-shadow: 0 0 32px rgba(201, 162, 39, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4);
-  transform: translateY(-1px);
-}
-
-.btn-arrow {
-  transition: transform 0.2s;
-}
-
-.btn-primary:hover .btn-arrow {
-  transform: translateX(3px);
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--text-muted);
-  border-color: var(--border);
-}
-
-.btn-ghost:hover {
-  color: var(--text);
-  border-color: var(--text-muted);
-}
+/* Buttons: .btn, .btn-lg, .btn-primary, .btn-ghost → primitives.css */
 
 /* ─── Proof bar ─── */
 
@@ -278,22 +235,7 @@
   border-bottom: 1px solid var(--border);
 }
 
-.section-kicker {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--accent);
-  font-weight: 600;
-  margin: 0 0 0.75rem;
-}
-
-.section-title {
-  font-size: clamp(1.5rem, 3.5vw, 2.25rem);
-  font-weight: 700;
-  line-height: 1.2;
-  margin: 0 0 2.5rem;
-  color: var(--text);
-}
+/* .section-kicker, .section-title → primitives.css */
 
 /* ─── Feature grid ─── */
 
@@ -386,14 +328,8 @@
   margin-bottom: 0;
 }
 
-.mono {
-  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.text-muted {
-  color: var(--text-muted);
+/* .mono, .text-muted → primitives.css */
+.compare-body .text-muted {
   opacity: 0.6;
 }
 
