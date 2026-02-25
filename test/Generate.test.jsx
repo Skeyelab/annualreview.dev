@@ -34,7 +34,7 @@ describe("Generate", () => {
     expect(screen.getByRole("heading", { name: /generate review/i })).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/timeframe.*contributions/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /generate review/i })).toBeInTheDocument();
-    expect(screen.getByText(/sign in with github/i)).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /sign in with github/i })).toBeInTheDocument();
   });
 
   it("Try sample loads sample JSON into textarea", async () => {

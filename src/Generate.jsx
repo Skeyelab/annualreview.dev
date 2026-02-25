@@ -26,6 +26,7 @@ export default function Generate() {
     setError(null);
   }, []);
 
+  const [dataTab, setDataTab] = useState("app");
   const {
     collectStart,
     setCollectStart,
@@ -174,26 +175,57 @@ export default function Generate() {
         <section className="generate-get-data" aria-labelledby="get-data-heading">
           <h2 id="get-data-heading" className="generate-get-data-title">1. Get your GitHub data</h2>
 
-          <div className="generate-get-data-options">
-            {authChecked && user ? (
-              <div className="generate-option-card">
-                <h3 className="generate-option-heading">Fetch your data</h3>
-                <p className="generate-option-desc">Fetch your PRs and reviews for the date range.</p>
-                <CollectForm
-                  startDate={collectStart}
-                  endDate={collectEnd}
-                  onStartChange={setCollectStart}
-                  onEndChange={setCollectEnd}
-                  error={collectError}
-                  progress={collectProgress}
-                  loading={collectLoading}
-                  onSubmit={() => handleFetchGitHub(user)}
-                  submitLabel="Fetch my data"
-                />
-              </div>
-            ) : (
-              <>
-                <div className="generate-option-card">
+          <div className="generate-get-data-tabs" role="tablist" aria-label="How to get data">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={dataTab === "app"}
+              aria-controls="get-data-app-panel"
+              id="get-data-app-tab"
+              className={`generate-get-data-tab ${dataTab === "app" ? "generate-get-data-tab-active" : ""}`}
+              onClick={() => setDataTab("app")}
+            >
+              {authChecked && user ? "Fetch your data" : "Sign in with GitHub"}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={dataTab === "terminal"}
+              aria-controls="get-data-terminal-panel"
+              id="get-data-terminal-tab"
+              className={`generate-get-data-tab ${dataTab === "terminal" ? "generate-get-data-tab-active" : ""}`}
+              onClick={() => setDataTab("terminal")}
+            >
+              Use the terminal
+            </button>
+          </div>
+
+          <div className="generate-get-data-panels">
+            <div
+              id="get-data-app-panel"
+              role="tabpanel"
+              aria-labelledby="get-data-app-tab"
+              hidden={dataTab !== "app"}
+              className="generate-option-card"
+            >
+              {authChecked && user ? (
+                <>
+                  <h3 className="generate-option-heading">Fetch your data</h3>
+                  <p className="generate-option-desc">Fetch your PRs and reviews for the date range.</p>
+                  <CollectForm
+                    startDate={collectStart}
+                    endDate={collectEnd}
+                    onStartChange={setCollectStart}
+                    onEndChange={setCollectEnd}
+                    error={collectError}
+                    progress={collectProgress}
+                    loading={collectLoading}
+                    onSubmit={() => handleFetchGitHub(user)}
+                    submitLabel="Fetch my data"
+                  />
+                </>
+              ) : (
+                <>
                   <h3 className="generate-option-heading">Sign in with GitHub</h3>
                   <p className="generate-option-desc">
                     We fetch your PRs and reviews for the date range. We never store your code.
@@ -223,11 +255,17 @@ export default function Generate() {
                       autoComplete="off"
                     />
                   </CollectForm>
-                </div>
-              </>
-            )}
+                </>
+              )}
+            </div>
 
-            <div className="generate-option-card">
+            <div
+              id="get-data-terminal-panel"
+              role="tabpanel"
+              aria-labelledby="get-data-terminal-tab"
+              hidden={dataTab !== "terminal"}
+              className="generate-option-card"
+            >
               <h3 className="generate-option-heading">Use the terminal</h3>
               <p className="generate-option-desc">
                 Run two commands. Your token stays on your machine.
