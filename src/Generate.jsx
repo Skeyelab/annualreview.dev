@@ -15,6 +15,7 @@ const REPO_URL = "https://github.com/Skeyelab/annualreview.com";
 export default function Generate() {
   const { user, authChecked, logout } = useAuth();
   const [evidenceText, setEvidenceText] = useState("");
+  const [goals, setGoals] = useState("");
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
   const [result, setResult] = useState(null);
@@ -70,6 +71,9 @@ export default function Generate() {
     if (!evidence.timeframe?.start_date || !evidence.timeframe?.end_date || !Array.isArray(evidence.contributions)) {
       setError("Evidence must have timeframe.start_date, timeframe.end_date, and contributions array.");
       return;
+    }
+    if (goals.trim() && !evidence.goals) {
+      evidence = { ...evidence, goals: goals.trim() };
     }
     setError(null);
     setLoading(true);
@@ -263,6 +267,22 @@ yarn normalize --input raw.json --output evidence.json`}
           spellCheck={false}
         />
         <p className="generate-hint">On mobile, pasting long JSON can be cut off—use &quot;Upload evidence.json&quot; for large data.</p>
+
+        <div className="generate-goals-section">
+          <label htmlFor="generate-goals" className="generate-goals-label">
+            Annual goals <span className="generate-goals-optional">(optional)</span>
+          </label>
+          <textarea
+            id="generate-goals"
+            className="generate-textarea generate-goals-textarea"
+            placeholder={"Paste your annual goals here, e.g.:\n- Improve system reliability\n- Grow as a technical leader\n- Ship the new onboarding flow"}
+            value={goals}
+            onChange={(e) => setGoals(e.target.value)}
+            rows={4}
+            spellCheck={false}
+          />
+          <p className="generate-hint">Goals are used as context to align themes, bullets, and stories to what matters most to you.</p>
+        </div>
 
         {error && <p className="generate-error">{error}</p>}
         {progress && <p className="generate-progress">{progress}</p>}

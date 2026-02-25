@@ -4,6 +4,7 @@ INPUT:
 You will receive JSON with:
 - timeframe {start_date, end_date}
 - role_context (optional) {level, job_family, focus_areas}
+- goals (optional): free-text annual goals provided by the user
 - contributions: array of items with fields:
   { id, type, title, url, repo, merged_at, labels, files_changed, additions, deletions,
     summary, body, linked_issues, review_comments_count, approvals_count }
@@ -28,6 +29,7 @@ OUTPUT (valid JSON only) with this schema:
 }
 
 RULES:
+- If goals are provided, highlight themes that align with those goals and note the alignment in why_it_matters.
 - 4–8 themes max.
 - Themes must be human-readable (e.g., “Reliability & incident response”, “Developer experience”, “Performance/cost”, “Feature delivery”, “Security”, “Data/ingest”, “Architecture & refactors”).
 - Each theme needs 3–12 evidence_ids (unless low volume).
