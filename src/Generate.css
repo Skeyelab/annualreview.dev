@@ -1,8 +1,4 @@
-.generate {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+/* Layout: .generate → primitives.css */
 
 .generate-header {
   display: flex;
