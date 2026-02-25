@@ -52,6 +52,10 @@ Turn GitHub contribution evidence into an evidence-backed annual review draft: t
   ]
 }
 
+## Development
+- **TDD when possible:** For new behavior or non-trivial changes, write or update tests first (Vitest in `test/`), then implement until tests pass. For bugfixes, add a failing test that reproduces the bug, then fix.
+- Run `yarn test` before committing; ensure builds and tests pass before opening PRs.
+
 ## Notes
 - Prefer PRs and reviews as primary evidence.
 - Keep outputs copy/paste friendly; avoid long prose.

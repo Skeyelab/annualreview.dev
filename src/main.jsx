@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 import "./posthog";
 import App from "./App";
 import "./index.css";
+import "./primitives.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

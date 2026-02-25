@@ -7,6 +7,7 @@
   --accent-dim: #9a7b1a;
   --border: #2a2a2c;
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
 }
 
 * {

@@ -40,9 +40,31 @@ function contributionId(repo, type, numberOrSha) {
   return slug ? `${slug}#${numberOrSha}` : `#${numberOrSha}`;
 }
 
+/** Returns canonical contribution object (AGENTS.md contract) with defaults; overrides merge in. */
+function createContribution(overrides = {}) {
+  return {
+    id: "",
+    type: "",
+    title: "",
+    url: "",
+    repo: "",
+    merged_at: null,
+    labels: [],
+    files_changed: 0,
+    additions: 0,
+    deletions: 0,
+    summary: "",
+    body: "",
+    linked_issues: [],
+    review_comments_count: 0,
+    approvals_count: 0,
+    ...overrides,
+  };
+}
+
 function normalizePr(pr, repo) {
   const mergedAt = pr.merged_at || null;
-  return {
+  return createContribution({
     id: contributionId(repo, "pull_request", pr.number),
     type: "pull_request",
     title: pr.title || "",
@@ -55,73 +77,50 @@ function normalizePr(pr, repo) {
     deletions: pr.deletions ?? 0,
     summary: (pr.body || "").slice(0, 500),
     body: pr.body || "",
-    linked_issues: [], // could parse body for #n or expand from API
     review_comments_count: pr.review_comments ?? 0,
-    approvals_count: 0, // not in base PR object; would need reviews endpoint
-  };
+  });
 }
 
 function normalizeReview(review, repo, pullNumber) {
-  const id = contributionId(repo, "review", `${pullNumber}-${review.id}`);
-  return {
-    id,
+  return createContribution({
+    id: contributionId(repo, "review", `${pullNumber}-${review.id}`),
     type: "review",
     title: `Review: ${(review.body || "").slice(0, 60)}` || `Review #${review.id}`,
     url: review.html_url || review.url || "",
     repo: repo || "",
-    merged_at: null,
-    labels: [],
-    files_changed: 0,
-    additions: 0,
-    deletions: 0,
     summary: (review.body || "").slice(0, 500),
     body: review.body || "",
-    linked_issues: [],
-    review_comments_count: 0,
     approvals_count: review.state === "APPROVED" ? 1 : 0,
-  };
+  });
 }
 
 function normalizeRelease(release, repo) {
   const publishedAt = release.published_at || release.created_at || null;
-  return {
+  return createContribution({
     id: contributionId(repo, "release", release.id ?? release.tag_name),
     type: "release",
     title: release.name || release.tag_name || "Release",
     url: release.html_url || release.url || "",
     repo: repo || release.target_commitish || "",
     merged_at: publishedAt,
-    labels: [],
-    files_changed: 0,
-    additions: 0,
-    deletions: 0,
     summary: (release.body || "").slice(0, 500),
     body: release.body || "",
-    linked_issues: [],
-    review_comments_count: 0,
-    approvals_count: 0,
-  };
+  });
 }
 
 function normalizeCommit(commit, repo, sha) {
   const date = commit.author?.date || commit.committer?.date || commit.commit?.author?.date || null;
-  return {
+  const msg = commit.commit?.message || commit.message || "";
+  return createContribution({
     id: contributionId(repo, "issue", (sha || "").slice(0, 7)),
     type: "issue",
-    title: (commit.commit?.message || commit.message || "").split("\n")[0].slice(0, 200) || sha?.slice(0, 7) || "",
+    title: msg.split("\n")[0].slice(0, 200) || sha?.slice(0, 7) || "",
     url: commit.html_url || `https://github.com/${repo}/commit/${sha}`,
     repo: repo || "",
     merged_at: date,
-    labels: [],
-    files_changed: 0,
-    additions: 0,
-    deletions: 0,
-    summary: (commit.commit?.message || commit.message || "").slice(0, 500),
-    body: commit.commit?.message || commit.message || "",
-    linked_issues: [],
-    review_comments_count: 0,
-    approvals_count: 0,
-  };
+    summary: msg.slice(0, 500),
+    body: msg,
+  });
 }
 
 // Schema allows pull_request|review|release|issue. Orphan commits → issue for simplicity.
