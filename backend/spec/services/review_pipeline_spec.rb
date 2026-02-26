@@ -20,10 +20,10 @@ RSpec.describe ReviewPipeline do
   before do
     stub_request(:post, "https://api.openai.com/v1/chat/completions")
       .to_return(
-        { body: { choices: [{ message: { content: themes_response } }] }.to_json, headers: { "Content-Type" => "application/json" } },
-        { body: { choices: [{ message: { content: bullets_response } }] }.to_json, headers: { "Content-Type" => "application/json" } },
-        { body: { choices: [{ message: { content: stories_response } }] }.to_json, headers: { "Content-Type" => "application/json" } },
-        { body: { choices: [{ message: { content: self_eval_response } }] }.to_json, headers: { "Content-Type" => "application/json" } }
+        { body: { choices: [ { message: { content: themes_response } } ] }.to_json, headers: { "Content-Type" => "application/json" } },
+        { body: { choices: [ { message: { content: bullets_response } } ] }.to_json, headers: { "Content-Type" => "application/json" } },
+        { body: { choices: [ { message: { content: stories_response } } ] }.to_json, headers: { "Content-Type" => "application/json" } },
+        { body: { choices: [ { message: { content: self_eval_response } } ] }.to_json, headers: { "Content-Type" => "application/json" } }
       )
   end
 

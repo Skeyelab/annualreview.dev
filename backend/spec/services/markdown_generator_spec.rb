@@ -6,30 +6,30 @@ RSpec.describe MarkdownGenerator do
       themes: { themes: [
         { theme_id: "t1", theme_name: "Reliability", one_liner: "Made systems reliable",
           why_it_matters: "Uptime matters", confidence: "high",
-          anchor_evidence: [{ id: "org/repo#42", title: "Fix auth bug", url: "https://github.com/org/repo/pull/42" }] }
+          anchor_evidence: [ { id: "org/repo#42", title: "Fix auth bug", url: "https://github.com/org/repo/pull/42" } ] }
       ] },
       bullets: {
         top_10_bullets_overall: [
-          { text: "Fixed auth bug reducing errors by 50%", evidence: [{ id: "org/repo#42", url: "https://github.com/org/repo/pull/42" }] }
+          { text: "Fixed auth bug reducing errors by 50%", evidence: [ { id: "org/repo#42", url: "https://github.com/org/repo/pull/42" } ] }
         ],
         bullets_by_theme: [
           { theme_id: "t1", bullets: [
-            { text: "Improved auth flow", evidence: [{ id: "org/repo#42", url: "https://github.com/org/repo/pull/42" }] }
+            { text: "Improved auth flow", evidence: [ { id: "org/repo#42", url: "https://github.com/org/repo/pull/42" } ] }
           ] }
         ]
       },
       stories: { stories: [
         { title: "Auth Overhaul", situation: "Auth was broken", task: "Fix it",
-          actions: ["Rewrote auth middleware"], results: ["50% fewer errors"],
-          evidence: [{ id: "org/repo#42", url: "https://github.com/org/repo/pull/42" }],
+          actions: [ "Rewrote auth middleware" ], results: [ "50% fewer errors" ],
+          evidence: [ { id: "org/repo#42", url: "https://github.com/org/repo/pull/42" } ],
           confidence: "high" }
       ] },
       self_eval: { sections: {
-        summary: { text: "Strong year focused on reliability.", evidence: [{ id: "org/repo#42", url: "https://github.com/org/repo/pull/42" }] },
-        key_accomplishments: [{ text: "Fixed auth bug", evidence: [{ id: "org/repo#42", url: "https://github.com/org/repo/pull/42" }] }],
+        summary: { text: "Strong year focused on reliability.", evidence: [ { id: "org/repo#42", url: "https://github.com/org/repo/pull/42" } ] },
+        key_accomplishments: [ { text: "Fixed auth bug", evidence: [ { id: "org/repo#42", url: "https://github.com/org/repo/pull/42" } ] } ],
         how_i_worked: { text: "Collaborated closely with the team." },
         growth: { text: "Grew as an incident responder." },
-        next_year_goals: [{ text: "Lead a migration project" }]
+        next_year_goals: [ { text: "Lead a migration project" } ]
       } }
     }
   end

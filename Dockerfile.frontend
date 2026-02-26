@@ -10,13 +10,7 @@ RUN yarn install --frozen-lockfile --ignore-engines
 COPY index.html vite.config.ts tsconfig.json ./
 COPY src ./src
 COPY public ./public
-COPY prompts ./prompts
-COPY lib ./lib
-COPY server ./server
-COPY types ./types
-COPY schemas ./schemas
 
-# Build expects some env at build time; dummy is fine for static output
 ENV NODE_ENV=production
 RUN yarn build
 

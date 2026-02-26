@@ -16,12 +16,12 @@
     "collect": "node --import tsx/esm scripts/collect-github.ts",
     "generate": "node --import tsx/esm scripts/generate-review.ts",
     "dev": "vite",
+    "dev:full": "./script/foreman-start",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "start": "node --import tsx/esm server.ts",
     "typecheck": "tsc --noEmit"
   },
   "type": "module",

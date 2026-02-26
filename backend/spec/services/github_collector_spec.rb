@@ -19,7 +19,7 @@ RSpec.describe GithubCollector do
           mergedAt: "2025-06-15T12:00:00Z",
           additions: 100, deletions: 20, changedFiles: 5,
           baseRepository: { nameWithOwner: "org/repo" },
-          labels: { nodes: [{ name: "bug" }] },
+          labels: { nodes: [ { name: "bug" } ] },
           reviewThreads: { totalCount: 2 },
           reviews: { nodes: [
             { id: "R_1", body: "LGTM", state: "APPROVED", submittedAt: "2025-06-15T13:00:00Z", url: "https://github.com/org/repo/pull/42#pullrequestreview-1" }

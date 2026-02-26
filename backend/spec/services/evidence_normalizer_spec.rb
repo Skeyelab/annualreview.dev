@@ -11,7 +11,7 @@ RSpec.describe EvidenceNormalizer do
             html_url: "https://github.com/org/repo/pull/42",
             merged_at: "2025-06-15T12:00:00Z",
             base: { repo: { full_name: "org/repo" } },
-            labels: [{ name: "bug" }],
+            labels: [ { name: "bug" } ],
             changed_files: 5, additions: 100, deletions: 20,
             review_comments: 2
           }
@@ -42,7 +42,7 @@ RSpec.describe EvidenceNormalizer do
       expect(pr[:url]).to eq("https://github.com/org/repo/pull/42")
       expect(pr[:repo]).to eq("org/repo")
       expect(pr[:merged_at]).to eq("2025-06-15T12:00:00Z")
-      expect(pr[:labels]).to eq(["bug"])
+      expect(pr[:labels]).to eq([ "bug" ])
       expect(pr[:files_changed]).to eq(5)
       expect(pr[:additions]).to eq(100)
       expect(pr[:deletions]).to eq(20)
@@ -71,7 +71,7 @@ RSpec.describe EvidenceNormalizer do
     end
 
     it "deduplicates commits associated with PRs" do
-      raw[:pull_requests].first[:commits] = [{ sha: "abc1234" }]
+      raw[:pull_requests].first[:commits] = [ { sha: "abc1234" } ]
       raw[:commits] = [
         { sha: "abc1234", commit: { author: { date: "2025-06-01T00:00:00Z" }, message: "fix" }, repository: { full_name: "org/repo" } },
         { sha: "deadbeef", commit: { author: { date: "2025-06-01T00:00:00Z" }, message: "direct commit" }, repository: { full_name: "org/repo" } }

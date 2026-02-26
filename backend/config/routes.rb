@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Redirect root to frontend so opening the API URL shows the app (dev: 5173, prod: FRONTEND_URL).
+  root to: redirect(ENV.fetch("FRONTEND_URL", "http://localhost:5173"))
+
   namespace :api do
     get    "auth/github",          to: "auth#github"
     get    "auth/github/callback", to: "auth#callback"
@@ -10,6 +13,7 @@ Rails.application.routes.draw do
 
     post "collect",  to: "collect#create"
     post "generate", to: "generate#create"
+    get  "jobs",     to: "jobs#index"
     get  "jobs/:id", to: "jobs#show"
 
     scope "users/me" do
@@ -21,5 +25,5 @@ Rails.application.routes.draw do
   end
 
   # OmniAuth callback route
-  match "/auth/github/callback", to: "api/auth#callback", via: [:get, :post]
+  match "/auth/github/callback", to: "api/auth#callback", via: [ :get, :post ]
 end

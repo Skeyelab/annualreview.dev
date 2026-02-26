@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_26_025520) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_26_033305) do
   create_table "review_years", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "end_date"
@@ -31,6 +31,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_26_025520) do
     t.string "access_token"
     t.datetime "created_at", null: false
     t.integer "github_id", null: false
+    t.string "latest_job_id"
     t.string "login", null: false
     t.datetime "updated_at", null: false
     t.index ["github_id"], name: "index_users_on_github_id", unique: true

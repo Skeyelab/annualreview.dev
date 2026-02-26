@@ -13,6 +13,6 @@ class CreateReviewYears < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    add_index :review_years, [:user_id, :year], unique: true
+    add_index :review_years, [ :user_id, :year ], unique: true
   end
 end

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Free ports 5173 and 3000 and clear Rails pid so foreman start can run
+# (e.g. after a previous foreman run or after a crash).
+set -e
+cd "$(dirname "$0")/.."
+
+echo "Stopping any process on port 5173 (Vite)..."
+lsof -ti:5173 | xargs kill -9 2>/dev/null || true
+
+echo "Stopping any process on port 3000 (Rails)..."
+lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+
+PIDFILE="backend/tmp/pids/server.pid"
+if [[ -f "$PIDFILE" ]]; then
+  echo "Clearing Rails pid file..."
+  kill -9 "$(cat "$PIDFILE")" 2>/dev/null || true
+  rm -f "$PIDFILE"
+fi
+
+sleep 1
+exec foreman start
