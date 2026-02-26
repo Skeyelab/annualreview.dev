@@ -2,6 +2,7 @@
   "name": "annualreview-com",
   "version": "0.1.0",
   "private": true,
+  "workspaces": ["frontend"],
   "engines": {
     "node": ">=22.0.0"
   },
@@ -15,40 +16,34 @@
     "validate-evidence": "node --import tsx/esm scripts/validate-evidence.ts",
     "collect": "node --import tsx/esm scripts/collect-github.ts",
     "generate": "node --import tsx/esm scripts/generate-review.ts",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
-    "start": "node --import tsx/esm server.ts",
-    "typecheck": "tsc --noEmit"
+    "dev": "yarn workspace frontend dev",
+    "dev:full": "./scripts/foreman-start",
+    "build": "yarn workspace frontend build",
+    "preview": "yarn workspace frontend preview",
+    "test": "./scripts/run-tests.sh",
+    "test:cli": "vitest run --config vitest.config.cli.ts",
+    "test:ui": "yarn workspace frontend test:ui",
+    "test:ui:cli": "vitest --ui --config vitest.config.cli.ts",
+    "test:coverage": "yarn workspace frontend test:coverage",
+    "typecheck": "yarn workspace frontend typecheck"
   },
   "type": "module",
   "dependencies": {
     "@posthog/ai": "^7.9.3",
     "ajv": "^8.18.0",
     "openai": "^6.25.0",
-    "posthog-js": "^1.354.0",
     "posthog-node": "^5.26.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-markdown": "10.1.0"
+    "react-markdown": "10.1.0",
+    "tsx": "^4.21.0"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
     "@types/node": "^25.3.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/coverage-v8": "4.0.18",
-    "@vitest/ui": "4.0.18",
     "jsdom": "^28.1.0",
-    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "vite": "^6.0.3",
     "vitest": "^4.0.18"
   }
 }

@@ -38,6 +38,7 @@ OUTPUT (valid JSON only):
 
 RULES:
 - If goals are provided, reference them in the summary and key_accomplishments to show alignment between work done and intended goals.
+- When a goal contains a word that appears in a contribution's repo name, ensure that work is reflected in summary and/or key_accomplishments and explicitly tied to that goal.
 - Keep each section concise and form-friendly.
 - Evidence should back claims; if evidence doesn’t exist, ask a question instead.
 - Next year goals can be inferred from themes, but MUST ask for confirmation.

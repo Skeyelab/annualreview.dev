@@ -101,6 +101,28 @@ describe("generateMarkdown", () => {
     expect(md).not.toMatch(/\d{4}-\d{2}-\d{2}/);
   });
 
+  it("includes Goals section after header when goals provided", () => {
+    const md = generateMarkdown(sampleData, {
+      goals: "Improve reliability.\nGrow as a tech lead.",
+    });
+    expect(md).toContain("## Goals");
+    expect(md).toContain("Improve reliability.");
+    expect(md).toContain("Grow as a tech lead.");
+    const goalsIdx = md.indexOf("## Goals");
+    const summaryIdx = md.indexOf("## Summary");
+    expect(goalsIdx).toBeGreaterThan(-1);
+    expect(summaryIdx).toBeGreaterThan(goalsIdx);
+  });
+
+  it("omits Goals section when goals not provided or empty", () => {
+    const mdNoOpts = generateMarkdown(sampleData);
+    expect(mdNoOpts).not.toContain("## Goals");
+    const mdEmpty = generateMarkdown(sampleData, { goals: "" });
+    expect(mdEmpty).not.toContain("## Goals");
+    const mdWhitespace = generateMarkdown(sampleData, { goals: "   \n  " });
+    expect(mdWhitespace).not.toContain("## Goals");
+  });
+
   it("includes Themes section with theme name and confidence", () => {
     const md = generateMarkdown(sampleData);
     expect(md).toContain("## Themes");

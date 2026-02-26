@@ -1,11 +1,11 @@
-// Validates data against schemas/evidence.json (timeframe, contributions, etc.). Used by CLI and tests.
+// Validates data against lib/schemas/evidence.json (timeframe, contributions, etc.). Used by CLI and tests.
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import Ajv, { type ErrorObject } from "ajv";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const schemaPath = join(__dirname, "..", "schemas", "evidence.json");
+const schemaPath = join(__dirname, "schemas", "evidence.json");
 const schema = JSON.parse(readFileSync(schemaPath, "utf8"));
 const ajv = new Ajv({ strict: false, logger: false });
 const validate = ajv.compile(schema);

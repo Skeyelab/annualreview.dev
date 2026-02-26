@@ -28,6 +28,7 @@ OUTPUT (valid JSON only):
 
 RULES:
 - If goals are provided, prefer stories from themes that most directly support those goals.
+- When a goal contains a word that appears in a contribution's repo name, prefer including that contribution in a STAR story that supports that goal; do not omit such work from stories.
 - 2–3 stories total.
 - Keep situation/task concise; focus on actions/results.
 - Results must be evidenced; if not, mark as “Potential result (confirm)”.

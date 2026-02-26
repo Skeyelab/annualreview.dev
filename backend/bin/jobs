@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require_relative "../config/environment"
+require "solid_queue/cli"
+
+$stdout.puts "[jobs] Solid Queue worker starting (queue: #{Rails.env})"
+$stdout.flush
+SolidQueue::Cli.start(ARGV)

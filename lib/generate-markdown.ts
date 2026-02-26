@@ -80,6 +80,7 @@ interface GenerateMarkdownInput {
 
 interface GenerateMarkdownOptions {
   timeframe?: Timeframe;
+  goals?: string;
 }
 
 function evidenceLinks(evidence: EvidenceRef[] = []): string {
@@ -89,7 +90,7 @@ function evidenceLinks(evidence: EvidenceRef[] = []): string {
 
 export function generateMarkdown(
   { themes, bullets, stories, self_eval }: GenerateMarkdownInput,
-  { timeframe }: GenerateMarkdownOptions = {}
+  { timeframe, goals }: GenerateMarkdownOptions = {}
 ): string {
   const lines = [];
 
@@ -99,6 +100,12 @@ export function generateMarkdown(
     lines.push(`*${timeframe.start_date} – ${timeframe.end_date}*`);
   }
   lines.push("");
+
+  // ── Goals ───────────────────────────────────────────────────────────────────
+  const goalsTrimmed = goals?.trim();
+  if (goalsTrimmed) {
+    lines.push("---", "", "## Goals", "", goalsTrimmed, "");
+  }
 
   // ── Summary ─────────────────────────────────────────────────────────────────
   const summary = self_eval?.sections?.summary;

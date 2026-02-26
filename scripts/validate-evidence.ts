@@ -1,5 +1,5 @@
 /**
- * Validate a JSON file against schemas/evidence.json.
+ * Validate a JSON file against lib/schemas/evidence.json.
  * Usage: node --import tsx/esm scripts/validate-evidence.ts [path]
  */
 
