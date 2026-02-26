@@ -1,0 +1,209 @@
+.narrative-section {
+  margin-bottom: 1rem;
+}
+
+.narrative-block {
+  margin-bottom: 1.5rem;
+}
+
+.narrative-block-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.narrative-heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.narrative-toggle {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.narrative-toggle:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.narrative-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.narrative-card {
+  border-radius: 12px;
+  border: 1px solid rgba(201, 162, 39, 0.2);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.narrative-theme {
+  padding: 1.25rem;
+}
+
+.narrative-theme + .narrative-theme {
+  border-top: 1px solid var(--border);
+}
+
+.narrative-theme-name {
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+}
+
+.narrative-theme-oneliner {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0 0 0.35rem;
+}
+
+.narrative-theme-why {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0 0 0.35rem;
+}
+
+.narrative-theme-why strong {
+  font-weight: 600;
+}
+
+.narrative-theme-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 0.35rem;
+}
+
+.narrative-theme-evidence {
+  margin: 0.35rem 0 0;
+}
+
+.narrative-theme-evidence .evidence-tag {
+  margin-right: 0.25rem;
+}
+
+.narrative-bullet {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem;
+}
+
+.narrative-bullet:last-child {
+  margin-bottom: 0;
+}
+
+.narrative-section .evidence-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(201, 162, 39, 0.1);
+  color: var(--accent);
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  margin-left: 0.25rem;
+  vertical-align: middle;
+  text-decoration: none;
+}
+
+.narrative-section .evidence-tag:hover {
+  background: rgba(201, 162, 39, 0.2);
+}
+
+.narrative-json-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.narrative-json-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ─── STAR stories ─── */
+.narrative-story {
+  padding: 1.25rem;
+}
+
+.narrative-story + .narrative-story {
+  border-top: 1px solid var(--border);
+}
+
+.narrative-story-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.narrative-story-field {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0 0 0.35rem;
+}
+
+.narrative-story-field strong {
+  font-weight: 600;
+}
+
+.narrative-story-list {
+  font-size: 0.85rem;
+  margin: 0 0 0.5rem;
+}
+
+.narrative-story-list ul {
+  margin: 0.25rem 0 0 1.25rem;
+  padding: 0;
+}
+
+.narrative-story-list li {
+  margin-bottom: 0.2rem;
+}
+
+.narrative-story-evidence {
+  margin: 0.35rem 0 0;
+}
+
+/* ─── Self-eval ─── */
+.narrative-selfeval {
+  padding: 0;
+}
+
+.narrative-selfeval-section {
+  padding: 1.25rem;
+}
+
+.narrative-selfeval-section + .narrative-selfeval-section {
+  border-top: 1px solid var(--border);
+}
+
+.narrative-selfeval-heading {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin: 0 0 0.4rem;
+}
+
+.narrative-selfeval-text {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.narrative-selfeval-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.narrative-selfeval-list li {
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}

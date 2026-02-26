@@ -9,7 +9,7 @@ import { parseJsonResponse, pollJob } from "./api.js";
 import { useAuth } from "./hooks/useAuth";
 import { useGitHubCollect } from "./hooks/useGitHubCollect";
 import CollectForm from "./CollectForm";
-import ResultSection from "./ResultSection";
+import NarrativeView, { type NarrativeViewProps } from "./NarrativeView";
 
 const GITHUB_TOKEN_URL =
   "https://github.com/settings/tokens/new?scopes=repo&description=AnnualReview.dev";
@@ -513,13 +513,7 @@ yarn normalize --input raw.json --output evidence.json`}
         {result && (
           <div className="generate-result">
             <h2>Your review</h2>
-            <ResultSection title="Themes" data={result.themes} />
-            <ResultSection title="Bullets" data={result.bullets} />
-            <ResultSection title="STAR stories" data={result.stories} />
-            <ResultSection
-              title="Self-eval sections"
-              data={result.self_eval}
-            />
+            <NarrativeView {...(result as NarrativeViewProps)} />
             <ReportSection
               result={result}
               evidenceText={evidenceText}
