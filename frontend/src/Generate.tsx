@@ -1,5 +1,6 @@
 // Page: 1) Get GitHub data (OAuth or token or CLI), 2) Paste/upload evidence JSON, 3) Generate → themes, bullets, stories, self-eval.
 import React, { useState, useEffect, useCallback } from "react";
+import ReactMarkdown from "react-markdown";
 import "./Generate.css";
 import { generateMarkdown } from "../../lib/generate-markdown.js";
 import type { Timeframe } from "../../types/evidence.js";
@@ -484,7 +485,7 @@ yarn normalize --input raw.json --output evidence.json`}
             id="generate-goals"
             className="generate-textarea generate-goals-textarea"
             placeholder={
-              "Paste your annual goals here, e.g.:\n- Improve system reliability\n- Grow as a technical leader\n- Ship the new onboarding flow"
+              "One goal per line, e.g.:\nImprove system reliability\nGrow as a technical leader\nShip the new onboarding flow"
             }
             value={goals}
             onChange={(e) => setGoals(e.target.value)}
@@ -492,8 +493,8 @@ yarn normalize --input raw.json --output evidence.json`}
             spellCheck={false}
           />
           <p className="generate-hint">
-            Goals are used as context to align themes, bullets, and stories to
-            what matters most to you.
+            Enter one goal per line. Goals are used as context to align themes,
+            bullets, and stories to what matters most to you.
           </p>
         </div>
 
@@ -590,7 +591,9 @@ function ReportSection({
         </div>
       </div>
       {showPreview && (
-        <pre className="generate-pre generate-report-pre">{md}</pre>
+        <div className="generate-report-rendered">
+          <ReactMarkdown>{md}</ReactMarkdown>
+        </div>
       )}
     </section>
   );

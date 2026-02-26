@@ -55,6 +55,10 @@ The production stack uses Docker Compose with three services:
 
 See [docs/deploy-coolify.md](docs/deploy-coolify.md) for Coolify-specific setup.
 
+**OpenRouter (recommended):** Set `OPENROUTER_API_KEY` to your [OpenRouter](https://openrouter.ai) key. The pipeline defaults to `anthropic/claude-3.5-sonnet` — best-in-class instruction following and structured JSON quality for performance review generation. Override the model with `LLM_MODEL` (e.g. `LLM_MODEL=google/gemini-2.0-flash` for a faster/cheaper option). When `OPENROUTER_API_KEY` is set it takes priority over `OPENAI_API_KEY`.
+
+**OpenAI (legacy):** Set `OPENAI_API_KEY`. Default model is `gpt-4o-mini`; override with `LLM_MODEL`.
+
 **Required env:** `RAILS_MASTER_KEY`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `OPENAI_API_KEY`. In GitHub OAuth App settings, set **Authorization callback URL** to `https://<your-domain>/auth/github/callback`. See [docs/oauth-scopes.md](docs/oauth-scopes.md).
 
 **Optional (analytics):** `VITE_POSTHOG_API_KEY` — enables client-side PostHog (pageviews and autocapture). For EU host use `VITE_POSTHOG_HOST=https://eu.i.posthog.com`.
@@ -63,7 +67,7 @@ See [docs/deploy-coolify.md](docs/deploy-coolify.md) for Coolify-specific setup.
 
 - **Collect:** `GITHUB_TOKEN=xxx yarn collect --start YYYY-MM-DD --end YYYY-MM-DD --output raw.json` — fetches your PRs and reviews from GitHub for the date range.
 - **Normalize:** `yarn normalize --input raw.json --output evidence.json` — turns raw API output into the evidence contract.
-- **Generate:** `yarn generate evidence.json` — runs the LLM pipeline (themes → bullets → STAR → self-eval). Writes to `./out` by default; use `--out dir` to override. Requires `OPENAI_API_KEY`.
+- **Generate:** `yarn generate evidence.json` — runs the LLM pipeline (themes → bullets → STAR → self-eval). Writes to `./out` by default; use `--out dir` to override. Requires `OPENROUTER_API_KEY` (recommended) or `OPENAI_API_KEY`. Override the model with `LLM_MODEL` env var.
 
 ## Evidence grounding contract
 Every generated bullet/claim must cite evidence items by id+url. If impact is not proven, output must ask for confirmation instead of guessing.

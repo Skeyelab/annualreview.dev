@@ -12,8 +12,12 @@ The app is a **Docker Compose** stack (Rails API + Solid Queue worker + React fr
    - `RAILS_MASTER_KEY` — from `backend/config/master.key` (required; Coolify will prompt if missing)
    - `GITHUB_CLIENT_ID` — from [GitHub OAuth App](https://github.com/settings/developers)
    - `GITHUB_CLIENT_SECRET` — from the same OAuth App
-   - `OPENAI_API_KEY` — for the generate pipeline
-   - **FRONTEND_URL:** Assign a domain to the **frontend** service in Coolify; Coolify then sets `SERVICE_URL_FRONTEND`, which the compose file uses for post-login redirects. Optionally you can set `FRONTEND_URL` manually instead. The frontend container listens on port 80, so no port is needed in the magic variable. For services on other ports use `SERVICE_URL_<NAME>_<PORT>` and **hyphens** in the identifier (e.g. `SERVICE_URL_MY-SERVICE_3000`). See [Coolify’s magic environment variables](https://coolify.io/docs/knowledge-base/docker/compose#coolifys-magic-environment-variables).
+   - `OPENROUTER_API_KEY` — **recommended** for the generate pipeline; uses `anthropic/claude-3.5-sonnet` by default (best quality for structured performance review generation). Takes priority over `OPENAI_API_KEY` when both are set.
+   - `OPENAI_API_KEY` — alternative to `OPENROUTER_API_KEY`; uses `gpt-4o-mini` by default.
+   - `LLM_MODEL` — (optional) override the model, e.g. `google/gemini-2.0-flash` (OpenRouter, faster/cheaper) or `gpt-4o` (OpenAI)
+   - `POSTHOG_API_KEY` — (optional) same project token as frontend; enables LLM analytics (Traces/Generations in PostHog). If missing, pipeline runs but no LLM events are sent.
+   - `POSTHOG_HOST` — (optional) default `https://us.i.posthog.com`; use `https://eu.i.posthog.com` for EU.
+   - **FRONTEND_URL:** Assign a domain to the **frontend** service in Coolify; Coolify then sets `SERVICE_URL_FRONTEND`, which the compose file uses for post-login redirects. Optionally set `FRONTEND_URL` manually. The frontend container listens on port 80. For other ports use `SERVICE_URL_<NAME>_<PORT>` with **hyphens** (e.g. `SERVICE_URL_MY-SERVICE_3000`). See [Coolify’s magic environment variables](https://coolify.io/docs/knowledge-base/docker/compose#coolifys-magic-environment-variables).
 
 3. **GitHub OAuth App**
    - Set **Authorization callback URL** to:
