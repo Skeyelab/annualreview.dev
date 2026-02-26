@@ -544,7 +544,6 @@ function ReportSection({
   evidenceText,
   onDownload,
 }: ReportSectionProps) {
-  const [showPreview, setShowPreview] = useState(false);
   let timeframe: Timeframe | undefined;
   try {
     const ev = JSON.parse(evidenceText) as { timeframe?: Timeframe };
@@ -564,13 +563,6 @@ function ReportSection({
           <button
             type="button"
             className="generate-copy"
-            onClick={() => setShowPreview((v) => !v)}
-          >
-            {showPreview ? "Hide preview" : "Preview"}
-          </button>
-          <button
-            type="button"
-            className="generate-copy"
             onClick={() => navigator.clipboard.writeText(md)}
           >
             Copy
@@ -584,11 +576,9 @@ function ReportSection({
           </button>
         </div>
       </div>
-      {showPreview && (
-        <div className="generate-report-rendered">
-          <ReactMarkdown>{md}</ReactMarkdown>
-        </div>
-      )}
+      <div className="generate-report-rendered">
+        <ReactMarkdown>{md}</ReactMarkdown>
+      </div>
     </section>
   );
 }

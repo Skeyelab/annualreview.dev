@@ -1,5 +1,36 @@
 /* Layout: .generate → primitives.css */
 
+/* Dark scrollbars for scrollable blocks (matches theme; overrides light OS default) */
+.generate-pre,
+.generate-report-rendered,
+.generate-cmd {
+  scrollbar-color: var(--border) var(--bg-elevated);
+  scrollbar-width: thin;
+}
+.generate-pre::-webkit-scrollbar,
+.generate-report-rendered::-webkit-scrollbar,
+.generate-cmd::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.generate-pre::-webkit-scrollbar-track,
+.generate-report-rendered::-webkit-scrollbar-track,
+.generate-cmd::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+}
+.generate-pre::-webkit-scrollbar-thumb,
+.generate-report-rendered::-webkit-scrollbar-thumb,
+.generate-cmd::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+.generate-pre::-webkit-scrollbar-thumb:hover,
+.generate-report-rendered::-webkit-scrollbar-thumb:hover,
+.generate-cmd::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 .generate-header {
   display: flex;
   align-items: center;

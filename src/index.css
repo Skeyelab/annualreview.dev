@@ -16,6 +16,21 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-color: var(--border) var(--bg-elevated);
+  scrollbar-width: thin;
+}
+html::-webkit-scrollbar {
+  width: 10px;
+}
+html::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+}
+html::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+html::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 body {
