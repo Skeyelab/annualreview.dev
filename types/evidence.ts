@@ -1,6 +1,6 @@
 /**
  * TypeScript types for the evidence input contract.
- * Derived from schemas/evidence.json — keep in sync with that schema.
+ * Derived from lib/schemas/evidence.json — keep in sync with that schema.
  */
 
 /** ISO 8601 date string (YYYY-MM-DD). */

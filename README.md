@@ -3,6 +3,8 @@
 Turn GitHub contributions into an evidence-backed annual review. **https://annualreview.dev**
 
 This repo contains:
+- `frontend/` — Vite + React SPA (run with `yarn dev` or `yarn build`)
+- `backend/` — Rails API + Solid Queue (run with `foreman start` or `yarn dev:full`)
 - `PRD.md` — one-page product requirements doc
 - `prompts/` — Cursor-ready prompt templates for a GitHub→story pipeline
 - `AGENTS.md` — suggested agent workflow and guardrails

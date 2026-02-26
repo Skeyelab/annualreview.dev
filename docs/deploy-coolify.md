@@ -1,8 +1,10 @@
 # Deploying to Coolify
 
-Coolify works best with **Docker Compose**. The repo includes a compose file that runs the Rails API, Solid Queue worker, and the React frontend (nginx + SPA).
+The app is a **Docker Compose** stack (Rails API + Solid Queue worker + React frontend). There is no Node server; Nixpacks/Node deployment is no longer supported.
 
-## Option 1: Docker Compose (Rails stack, recommended)
+**If you had an existing Coolify deployment** using Nixpacks or a single Node service: create a **new resource** of type **Docker Compose** (same repo, root `docker-compose.yml`). You can leave the old resource stopped or remove it after the new one works.
+
+## Docker Compose (Rails stack)
 
 1. **In Coolify:** Create a new resource → **Docker Compose**. Point it at this repo and use the root `docker-compose.yml`.
 
@@ -27,19 +29,3 @@ Coolify works best with **Docker Compose**. The repo includes a compose file tha
    - Coolify’s reverse proxy should send `X-Forwarded-Proto` and `Host`; the frontend container passes these to Rails.
 
 ---
-
-## Option 2: Nixpacks (Node stack, legacy)
-
-The repo includes `nixpacks.toml` so you can deploy the **Node** app (Vite build + Node server) without Docker Compose.
-
-1. In Coolify, use **Nixpacks** (or a single-service Dockerfile) for this repo. Nixpacks will run `yarn build` and `yarn start`.
-
-2. **Environment variables**
-   - `SESSION_SECRET` — e.g. `openssl rand -hex 32`
-   - `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `OPENAI_API_KEY`
-   - Optional: `POSTHOG_API_KEY`, `POSTHOG_HOST`
-
-3. **GitHub OAuth**
-   - Callback URL: `https://<your-coolify-domain>/api/auth/callback/github`
-
-4. Coolify’s proxy should send `X-Forwarded-Proto: https` and `Host`.

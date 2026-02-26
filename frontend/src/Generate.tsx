@@ -1,8 +1,8 @@
 // Page: 1) Get GitHub data (OAuth or token or CLI), 2) Paste/upload evidence JSON, 3) Generate → themes, bullets, stories, self-eval.
 import React, { useState, useEffect, useCallback } from "react";
 import "./Generate.css";
-import { generateMarkdown } from "../lib/generate-markdown.js";
-import type { Timeframe } from "../types/evidence.js";
+import { generateMarkdown } from "../../lib/generate-markdown.js";
+import type { Timeframe } from "../../types/evidence.js";
 import { posthog } from "./posthog";
 import { parseJsonResponse, pollJob } from "./api.js";
 import { useAuth } from "./hooks/useAuth";
@@ -228,12 +228,9 @@ export default function Generate() {
           <div className="generate-error" role="alert">
             GitHub sign-in didn’t complete. For local dev, add this callback URL
             to your GitHub OAuth app:{" "}
-            <code>
-              {typeof window !== "undefined"
-                ? `${window.location.origin}/api/auth/callback/github`
-                : "http://localhost:5173/api/auth/callback/github"}
-            </code>{" "}
-            Then try again. Check the terminal for the failure reason.
+            <code>http://localhost:3000/auth/github/callback</code> (backend
+            origin + OmniAuth path). Then try again. Check the terminal for the
+            failure reason.
           </div>
         )}
 
