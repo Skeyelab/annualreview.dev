@@ -30,6 +30,7 @@ OUTPUT (valid JSON only) with this schema:
 
 RULES:
 - If goals are provided, highlight themes that align with those goals and note the alignment in why_it_matters.
+- When a goal contains a word that appears in a contribution's repo name (e.g. goal 'improve **payments**' and repo 'org/**payments**-service'), always include that contribution in a theme that aligns with that goal and note the alignment in why_it_matters.
 - 4–8 themes max.
 - Themes must be human-readable (e.g., “Reliability & incident response”, “Developer experience”, “Performance/cost”, “Feature delivery”, “Security”, “Data/ingest”, “Architecture & refactors”).
 - Each theme needs 3–12 evidence_ids (unless low volume).

@@ -38,6 +38,7 @@ OUTPUT (valid JSON only):
 
 BULLET WRITING RULES:
 - If goals are provided, prioritize bullets from themes that align with those goals, and note goal alignment when present.
+- When a goal contains a word that appears in a contribution's repo name, always treat that contribution as goal-aligned: include it in bullets for goal-aligned themes and prioritize it in top_10_bullets_overall when relevant.
 - Each bullet: “Did X so that Y” (action → outcome). If outcome not proven, write:
   “Did X (outcome likely: Y; confirm?)”
 - Avoid vanity metrics. Don’t fabricate numbers.

@@ -173,15 +173,18 @@ export default function Generate() {
 
   const handleDownloadReport = () => {
     let timeframe: Timeframe | undefined;
+    let goalsForReport: string | undefined;
     try {
-      const ev = JSON.parse(evidenceText) as { timeframe?: Timeframe };
+      const ev = JSON.parse(evidenceText) as { timeframe?: Timeframe; goals?: string };
       timeframe = ev.timeframe;
+      goalsForReport = ev.goals?.trim() || (goals as string).trim() || undefined;
     } catch {
       // no timeframe available
+      goalsForReport = (goals as string).trim() || undefined;
     }
     const md = generateMarkdown(
       result as Parameters<typeof generateMarkdown>[0],
-      { timeframe }
+      { timeframe, goals: goalsForReport }
     );
     const blob = new Blob([md], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
@@ -522,6 +525,7 @@ yarn normalize --input raw.json --output evidence.json`}
             <ReportSection
               result={result}
               evidenceText={evidenceText}
+              goals={goals}
               onDownload={handleDownloadReport}
             />
           </div>
@@ -534,6 +538,7 @@ yarn normalize --input raw.json --output evidence.json`}
 interface ReportSectionProps {
   result: PipelineResultLike;
   evidenceText: string;
+  goals: string;
   onDownload: () => void;
 }
 
@@ -541,19 +546,23 @@ interface ReportSectionProps {
 function ReportSection({
   result,
   evidenceText,
+  goals,
   onDownload,
 }: ReportSectionProps) {
   const [showPreview, setShowPreview] = useState(false);
   let timeframe: Timeframe | undefined;
+  let goalsForReport: string | undefined;
   try {
-    const ev = JSON.parse(evidenceText) as { timeframe?: Timeframe };
+    const ev = JSON.parse(evidenceText) as { timeframe?: Timeframe; goals?: string };
     timeframe = ev.timeframe;
+    goalsForReport = ev.goals?.trim() || goals.trim() || undefined;
   } catch {
     // no timeframe
+    goalsForReport = goals.trim() || undefined;
   }
   const md = generateMarkdown(
     result as Parameters<typeof generateMarkdown>[0],
-    { timeframe }
+    { timeframe, goals: goalsForReport }
   );
   return (
     <section className="generate-section generate-report-section">
