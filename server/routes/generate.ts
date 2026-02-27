@@ -40,9 +40,11 @@ export interface GenerateRoutesOptions {
 
 type Next = () => void;
 
+const STRIPE_API_VERSION = "2026-02-25.clover" as const;
+
 function defaultGetStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
-  return key ? new Stripe(key) : null;
+  return key ? new Stripe(key, { apiVersion: STRIPE_API_VERSION }) : null;
 }
 
 /**

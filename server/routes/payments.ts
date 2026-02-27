@@ -36,10 +36,12 @@ function readRawBody(req: IncomingMessage): Promise<Buffer> {
   });
 }
 
+const STRIPE_API_VERSION = "2026-02-25.clover" as const;
+
 function getStripeClient(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) return null;
-  return new Stripe(key);
+  return new Stripe(key, { apiVersion: STRIPE_API_VERSION });
 }
 
 let posthogClient: PostHog | null | undefined;
