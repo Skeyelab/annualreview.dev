@@ -11,6 +11,9 @@ import { useGitHubCollect } from "./hooks/useGitHubCollect";
 import CollectForm from "./CollectForm";
 import NarrativeView, { type NarrativeViewProps } from "./NarrativeView";
 
+/** Milliseconds to wait for React state to settle before auto-generating after Stripe redirect. */
+const STRIPE_RETURN_DELAY_MS = 100;
+
 const GITHUB_TOKEN_URL =
   "https://github.com/settings/tokens/new?scopes=repo&description=AnnualReview.dev";
 const REPO_URL = "https://github.com/Skeyelab/annualreview.com";
@@ -29,6 +32,7 @@ export default function Generate() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
   const [result, setResult] = useState<PipelineResultLike | null>(null);
+  const [isPremiumResult, setIsPremiumResult] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const onEvidenceReceived = useCallback((text: string) => {
@@ -44,6 +48,14 @@ export default function Generate() {
     if (params.get("error") === "auth_failed") {
       setAuthError(true);
       window.history.replaceState({}, "", window.location.pathname);
+    }
+    // Auto-generate premium report after returning from Stripe
+    const sessionId = params.get("session_id");
+    const isPremium = params.get("premium") === "1";
+    if (sessionId && isPremium) {
+      window.history.replaceState({}, "", window.location.pathname);
+      // Store session ID in sessionStorage so it survives a re-render
+      sessionStorage.setItem("stripe_session_id", sessionId);
     }
   }, []);
 
@@ -75,7 +87,7 @@ export default function Generate() {
       .catch(() => {});
   }, [user]);
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (stripeSessionId?: string) => {
     let evidence: Record<string, unknown>;
     try {
       evidence = JSON.parse(evidenceText) as Record<string, unknown>;
@@ -107,11 +119,15 @@ export default function Generate() {
     ) {
       evidence = { ...evidence, goals: (goals as string).trim() };
     }
+    if (stripeSessionId) {
+      evidence = { ...evidence, _stripe_session_id: stripeSessionId };
+    }
     setError(null);
     setLoading(true);
     setResult(null);
+    setIsPremiumResult(false);
     setProgress("");
-    posthog?.capture("review_generate_started");
+    posthog?.capture("review_generate_started", { premium: !!stripeSessionId });
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -120,13 +136,15 @@ export default function Generate() {
       });
       const data = (await parseJsonResponse(res)) as {
         job_id?: string;
+        premium?: boolean;
         error?: string;
         [key: string]: unknown;
       };
       if (res.status === 202 && data.job_id) {
         const out = await pollJob(data.job_id, setProgress);
         setResult(out as PipelineResultLike);
-        posthog?.capture("review_generate_completed");
+        setIsPremiumResult(!!data.premium);
+        posthog?.capture("review_generate_completed", { premium: !!data.premium });
       } else if (!res.ok) {
         throw new Error((data.error as string) || "Generate failed");
       } else {
@@ -142,6 +160,63 @@ export default function Generate() {
       setProgress("");
     }
   };
+
+  const handleUpgradeToPremium = async () => {
+    // Check we have valid evidence before redirecting to payment
+    try {
+      const ev = JSON.parse(evidenceText) as Record<string, unknown>;
+      const tf = ev.timeframe as { start_date?: string; end_date?: string } | undefined;
+      if (!tf?.start_date || !tf?.end_date || !Array.isArray(ev.contributions)) {
+        setError("Please load your evidence data first, then upgrade.");
+        return;
+      }
+    } catch {
+      setError("Please load your evidence data first, then upgrade.");
+      return;
+    }
+    setError(null);
+    // Save evidence so it survives the Stripe redirect
+    try {
+      sessionStorage.setItem("premium_evidence", evidenceText);
+      if (goals.trim()) sessionStorage.setItem("premium_goals", goals);
+    } catch {
+      // sessionStorage not available (unlikely in browser, ignore)
+    }
+    try {
+      const res = await fetch("/api/payments/checkout", { method: "POST" });
+      const data = (await parseJsonResponse(res)) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || "Could not start checkout");
+      }
+      posthog?.capture("premium_checkout_started");
+      window.location.href = data.url;
+    } catch (e) {
+      setError((e as Error).message || "Payment service unavailable. Try again later.");
+    }
+  };
+
+  // After returning from Stripe, restore evidence and auto-generate premium report
+  useEffect(() => {
+    const savedSessionId = sessionStorage.getItem("stripe_session_id");
+    if (!savedSessionId) return;
+    sessionStorage.removeItem("stripe_session_id");
+    const savedEvidence = sessionStorage.getItem("premium_evidence");
+    const savedGoals = sessionStorage.getItem("premium_goals");
+    if (savedEvidence) {
+      sessionStorage.removeItem("premium_evidence");
+      setEvidenceText(savedEvidence);
+    }
+    if (savedGoals) {
+      sessionStorage.removeItem("premium_goals");
+      setGoals(savedGoals);
+    }
+    if (savedEvidence) {
+      // Short timeout to let state settle before generating
+      const timer = setTimeout(() => handleGenerate(savedSessionId), STRIPE_RETURN_DELAY_MS);
+      return () => clearTimeout(timer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -501,18 +576,34 @@ yarn normalize --input raw.json --output evidence.json`}
         {error && <p className="generate-error">{error}</p>}
         {progress && <p className="generate-progress">{progress}</p>}
 
-        <button
-          type="button"
-          className="generate-btn"
-          onClick={handleGenerate}
-          disabled={loading}
-        >
-          {loading ? "Generating…" : "3. Generate review"}
-        </button>
+        <div className="generate-actions">
+          <button
+            type="button"
+            className="generate-btn"
+            onClick={() => handleGenerate()}
+            disabled={loading}
+          >
+            {loading ? "Generating…" : "3. Generate review (free)"}
+          </button>
+          <button
+            type="button"
+            className="generate-btn generate-btn-premium"
+            onClick={handleUpgradeToPremium}
+            disabled={loading}
+            title="Uses a state-of-the-art model for a higher quality report"
+          >
+            ✦ Generate premium report ($1)
+          </button>
+        </div>
 
         {result && (
           <div className="generate-result">
-            <h2>Your review</h2>
+            <h2>
+              Your review
+              {isPremiumResult && (
+                <span className="generate-premium-badge">✦ Premium</span>
+              )}
+            </h2>
             <NarrativeView {...(result as NarrativeViewProps)} />
             <ReportSection
               result={result}

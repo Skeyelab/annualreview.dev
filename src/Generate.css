@@ -465,6 +465,35 @@
   cursor: not-allowed;
 }
 
+.generate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.generate-btn-premium {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.generate-btn-premium:hover:not(:disabled) {
+  background: #6d28d9;
+}
+
+.generate-premium-badge {
+  display: inline-block;
+  margin-left: 0.6rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #7c3aed;
+  color: #fff;
+  border-radius: 4px;
+  vertical-align: middle;
+  letter-spacing: 0.03em;
+}
+
 .generate-result {
   margin-top: 2.5rem;
   padding-top: 2rem;

@@ -174,6 +174,8 @@ export interface PipelineOptions {
   apiKey?: string;
   model?: string;
   baseURL?: string;
+  /** When true, uses the premium (higher-quality) model. */
+  premium?: boolean;
   onProgress?: (progress: {
     stepIndex: number;
     total: number;
@@ -191,8 +193,9 @@ export async function runPipeline(
   evidence: Evidence,
   {
     apiKey = process.env.OPENROUTER_API_KEY ?? process.env.OPENAI_API_KEY,
-    model = process.env.LLM_MODEL ?? (process.env.OPENROUTER_API_KEY ? "anthropic/claude-3.5-sonnet" : "gpt-4o-mini"),
+    model,
     baseURL = process.env.OPENROUTER_API_KEY ? "https://openrouter.ai/api/v1" : undefined,
+    premium = false,
     onProgress,
     posthogTraceId,
     posthogDistinctId,
@@ -200,7 +203,15 @@ export async function runPipeline(
 ): Promise<PipelineResult> {
   if (!apiKey) throw new Error("OPENAI_API_KEY or OPENROUTER_API_KEY required");
 
-  const key = cacheKey(evidence, model);
+  // Resolve model: explicit > env override > premium/free defaults based on provider
+  const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+  const resolvedModel = model ?? (
+    premium
+      ? (process.env.PREMIUM_LLM_MODEL ?? (useOpenRouter ? "anthropic/claude-3.5-sonnet" : "gpt-4o"))
+      : (process.env.LLM_MODEL ?? (useOpenRouter ? "anthropic/claude-3-haiku" : "gpt-4o-mini"))
+  );
+
+  const key = cacheKey(evidence, resolvedModel);
   const cached = resultCache.get(key);
   if (cached) {
     if (typeof onProgress === "function") {
@@ -271,7 +282,7 @@ export async function runPipeline(
     const input = step.buildInput(evidence, previousResults);
     const promptContent = loadPrompt(step.promptFile);
     const res = await openai.chat.completions.create({
-      model,
+      model: resolvedModel,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: `${promptContent}\n\nINPUT JSON:\n${input}` },

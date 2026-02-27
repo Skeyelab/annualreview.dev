@@ -56,6 +56,7 @@ import { authRoutes } from "./server/routes/auth.ts";
 import { jobsRoutes } from "./server/routes/jobs.ts";
 import { generateRoutes } from "./server/routes/generate.ts";
 import { collectRoutes } from "./server/routes/collect.ts";
+import { paymentsRoutes } from "./server/routes/payments.ts";
 
 const MIME: Record<string, string> = {
   ".html": "text/html",
@@ -188,6 +189,11 @@ function handleRequest(
         runInBackground,
         runPipeline,
       })(wrappedReq, res, next);
+      return;
+    }
+
+    if (area === "payments") {
+      paymentsRoutes({ respondJson })(wrappedReq, res, next);
       return;
     }
 

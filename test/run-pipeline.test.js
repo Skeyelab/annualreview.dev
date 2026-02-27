@@ -163,4 +163,19 @@ describe("runPipeline", () => {
     await runPipeline(evidence, { apiKey: "sk-test" });
     expect(createCallCount).toBe(4);
   });
+
+  it("premium flag uses a different model than free tier", async () => {
+    const evidence = {
+      timeframe: { start_date: "2025-01-01", end_date: "2025-12-31" },
+      contributions: [],
+    };
+    await runPipeline(evidence, { apiKey: "sk-test", premium: false });
+    const freeModel = lastCreateArgs[0]?.model;
+    createCallCount = 0;
+    lastCreateArgs = [];
+    clearPipelineCache();
+    await runPipeline(evidence, { apiKey: "sk-test", premium: true });
+    const premiumModel = lastCreateArgs[0]?.model;
+    expect(premiumModel).not.toBe(freeModel);
+  });
 });
