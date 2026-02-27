@@ -26,6 +26,11 @@
   },
   "type": "module",
   "dependencies": {
+    "@opentelemetry/api-logs": "^0.212.0",
+    "@opentelemetry/exporter-logs-otlp-http": "^0.212.0",
+    "@opentelemetry/resources": "^2.5.1",
+    "@opentelemetry/sdk-logs": "^0.212.0",
+    "@opentelemetry/sdk-node": "^0.212.0",
     "@posthog/ai": "^7.9.3",
     "ajv": "^8.18.0",
     "openai": "^6.25.0",

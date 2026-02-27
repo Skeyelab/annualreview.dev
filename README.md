@@ -33,7 +33,7 @@ The app needs a Node server in production so `/api/auth/*` and other API routes 
 
 **OpenAI (legacy):** Set `OPENAI_API_KEY`. Default model is `gpt-4o-mini`; override with `LLM_MODEL`.
 
-**Optional (analytics):** `VITE_POSTHOG_API_KEY` (or `POSTHOG_API_KEY`) — enables client-side PostHog (pageviews and autocapture). For EU host use `VITE_POSTHOG_HOST=https://eu.i.posthog.com`. For server-side LLM analytics (Traces/Generations in PostHog), set `POSTHOG_API_KEY` and optionally `POSTHOG_HOST` (default `https://us.i.posthog.com`). Same project token as frontend is fine. In PostHog, open **Product → LLM analytics** (or filter Events by `$ai_generation`) to see pipeline generations.
+**Optional (analytics):** `VITE_POSTHOG_API_KEY` (or `POSTHOG_API_KEY`) — enables client-side PostHog (pageviews and autocapture). For EU host use `VITE_POSTHOG_HOST=https://eu.i.posthog.com`. For server-side LLM analytics (Traces/Generations in PostHog) and Node logs (OTLP), set `POSTHOG_API_KEY` and optionally `POSTHOG_HOST` (default `https://us.i.posthog.com`). Same project token as frontend is fine. In PostHog: **Product → LLM analytics** (or filter Events by `$ai_generation`) for pipeline generations; **Logs** for server logs.
 
 ## Scripts
 
